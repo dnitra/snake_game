@@ -8,7 +8,7 @@ let pixels = 10;
 const gameSpeedArray = [140,120,100,90,80]
 let speedMode = 0
 let gameSpeed = gameSpeedArray[speedMode]
-let oldFood = [-1,-1]
+let oldFood = []
 let highestScore =0
 let score = 0
 scoreDiv.textContent = "Score: "+ score
@@ -115,11 +115,14 @@ function snakeMovement(snake, mode){
     }
     
     if(!gameOver){
+        
         if(newSnakeHead[0] == food[0] && newSnakeHead[1] == food[1]){
-            oldFood = food
+            
+            oldFood.push(food)
+            console.log(oldFood)
             food = foodApear(newSnakeHead)
             
-            document.querySelector(`#${"x"+oldFood[0]+"y"+oldFood[1]}`).classList.remove("food")
+            document.querySelector(`#${"x"+oldFood[oldFood.length-1][0]+"y"+oldFood[oldFood.length-1][1]}`).classList.remove("food")
             document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
             
             score++
@@ -133,13 +136,21 @@ function snakeMovement(snake, mode){
                 document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
             }
         }
-        if(snakeTail[0] == oldFood[0] && snakeTail[1] == oldFood[1]){
-            oldFood = [-1,-1]
+        
+        snake.shift()
+        document.querySelector(`#${"x"+snakeTail[0]+"y"+snakeTail[1]}`).classList.remove("snake")
+
+        if(oldFood.length>0){
+            if( snakeTail[0] == oldFood[0][0] && snakeTail[1] == oldFood[0][1]){
+                oldFood.shift()
+                snake.unshift([snakeTail[0],snakeTail[1]])
+                document.querySelector(`#${"x"+snakeTail[0]+"y"+snakeTail[1]}`).classList.add("snake")
+            }
+        
         }
-        else{
-            snake.shift()
-            document.querySelector(`#${"x"+snakeTail[0]+"y"+snakeTail[1]}`).classList.remove("snake")
-        }
+       
+      
+        
         snake.push(newSnakeHead)
         document.querySelector(`#${"x"+snakeHead[0]+"y"+snakeHead[1]}`).classList.remove("head")
         document.querySelector(`#${"x"+newSnakeHead[0]+"y"+newSnakeHead[1]}`).classList.add("snake")
@@ -194,7 +205,7 @@ function restart(){
     score = 0
     scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
     
-    oldFood = [-1,-1]
+    oldFood = []
     mode = moveRight
     foodArray = []
 
