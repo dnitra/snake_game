@@ -1,6 +1,6 @@
 const container_game = document.querySelector(".container_game")
 const width = container_game.clientWidth
-console.log(width)
+const arrowbuttons = document.querySelectorAll(".arrows")
 const restartButton = document.querySelector("#restartButton")
 const startButton = document.querySelector("#start")
 let scoreDiv = document.querySelector(".score")
@@ -24,10 +24,28 @@ highScoreDiv.textContent = "Highest score: "+ highestScore
 restartButton.addEventListener("mousedown",restart)
 startButton.addEventListener("mousedown",playGame)
 
+arrowbuttons.forEach(arrow=>arrow.addEventListener("click",(e)=>{
+    console.log(e.target.value)
+    switch(e.target.value){
+        case "ArrowDown":
+            mode= moveDown
+            break;
+        case "ArrowUp":
+            mode= moveUp
+            break;
+        case "ArrowLeft":
+            mode= moveLeft
+            break;
+        case "ArrowRight":
+            mode= moveRight
+            break;
+    }
+}))
 
 
+window.addEventListener("keydown",keyPressed)
 
-
+restart()
 
 function playGame(){
      
@@ -42,37 +60,6 @@ function playGame(){
          
       }, gameSpeed)
 }
-
-window.addEventListener("keydown",(key)=>{ 
-    console.log(key.key)
-    switch(key.key){
-        case "ArrowDown":
-            mode= moveDown
-            break;
-        case "ArrowUp":
-            mode= moveUp
-            break;
-        case "ArrowLeft":
-            mode= moveLeft
-            break;
-        case "ArrowRight":
-            mode= moveRight
-            break;
-        case "Escape":
-            gameOver=true 
-            break;
-        case "Enter":
-            if(gameOver){
-                gameOver=false
-                document.querySelector(`#${"x"+snake[snake.length-1][0]+"y"+snake[snake.length-1][1]}`).classList.remove("headCrash")
-                playGame()
-            }
-            break;
-    }
-})
-
-restart()
-
 
 function layout(){
     for(let x =0;x<pixels;x++){
@@ -228,76 +215,33 @@ function restart(){
     food = foodApear([pixels/2,pixels/2+2])
     document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
 
-  
-
-
 }
 
-function swipedetect(el, callback){
+function keyPressed (key){
   
-    var touchsurface = el,
-    swipedir,
-    startX,
-    startY,
-    distX,
-    distY,
-    threshold = 150, //required min distance traveled to be considered swipe
-    restraint = 100, // maximum distance allowed at the same time in perpendicular direction
-    allowedTime = 300, // maximum time allowed to travel that distance
-    elapsedTime,
-    startTime,
-    handleswipe = callback || function(swipedir){}
-  
-    touchsurface.addEventListener('touchstart', function(e){
-        var touchobj = e.changedTouches[0]
-        swipedir = 'none'
-        dist = 0
-        startX = touchobj.pageX
-        startY = touchobj.pageY
-        startTime = new Date().getTime() // record time when finger first makes contact with surface
-        e.preventDefault()
-    }, false)
-  
-    touchsurface.addEventListener('touchmove', function(e){
-        e.preventDefault() // prevent scrolling when inside DIV
-    }, false)
-  
-    touchsurface.addEventListener('touchend', function(e){
-        var touchobj = e.changedTouches[0]
-        distX = touchobj.pageX - startX // get horizontal dist traveled by finger while in contact with surface
-        distY = touchobj.pageY - startY // get vertical dist traveled by finger while in contact with surface
-        elapsedTime = new Date().getTime() - startTime // get time elapsed
-        if (elapsedTime <= allowedTime){ // first condition for awipe met
-            if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint){ // 2nd condition for horizontal swipe met
-                swipedir = (distX < 0)? 'left' : 'right' // if dist traveled is negative, it indicates left swipe
-            }
-            else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint){ // 2nd condition for vertical swipe met
-                swipedir = (distY < 0)? 'up' : 'down' // if dist traveled is negative, it indicates up swipe
-            }
-        }
-        handleswipe(swipedir)
-        e.preventDefault()
-    }, false)
-}
-  
-
-swipedetect(container_game, function(swipedir){
-   
-    switch(swipedir){
-        case "down":
+    switch(key.key){
+        case "ArrowDown":
             mode= moveDown
             break;
-        case "top":
+        case "ArrowUp":
             mode= moveUp
             break;
-        case "left":
+        case "ArrowLeft":
             mode= moveLeft
             break;
-        case "right":
+        case "ArrowRight":
             mode= moveRight
             break;
-        
-
+        case "Escape":
+            gameOver=true 
+            break;
+        case "Enter":
+            if(gameOver){
+                gameOver=false
+                document.querySelector(`#${"x"+snake[snake.length-1][0]+"y"+snake[snake.length-1][1]}`).classList.remove("headCrash")
+                playGame()
+            }
+            break;
     }
-})
+}
 

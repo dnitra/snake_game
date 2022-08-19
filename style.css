@@ -10,9 +10,22 @@ body{
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    width: 150px;
+    width: 250px;
     gap: 15px;
 }
+.arrows_container{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 200px;
+    height: 200px;
+}
+.arrows{
+    font-size: 40px;
+    width: 80px;
+    height: 80px;
+}
+
 .score{
     font-size: 20px;
 }
