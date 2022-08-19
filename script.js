@@ -1,18 +1,23 @@
 const container_game = document.querySelector(".container_game")
+const restartButton = document.querySelector("#restartButton")
 let scoreDiv = document.querySelector(".score")
 const square = document.createElement("div")
-let pixels = 16;
+let foodArray = []
+let pixels = 10;
 const gameSpeed = 100
 let oldFood = [-1,-1]
 let score = 0
 scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
+restartButton.addEventListener("click",restart)
 
 
-let snake = [[pixels/2,pixels/2-1],[pixels/2,pixels/2],[pixels/2,pixels/2+1]]
+let snake = [[pixels/2,0],[pixels/2,1],[pixels/2,2]]
 
 
 let mode = moveRight
 let gameOver = false
+
+
 function playGame(){
     let game = setInterval(()=>{
  
@@ -23,7 +28,7 @@ function playGame(){
          
       }, gameSpeed)
     }
-playGame()
+
 
 
 window.addEventListener("keydown",(key)=>{
@@ -45,6 +50,7 @@ window.addEventListener("keydown",(key)=>{
             gameOver=true 
             break;
         case "Enter":
+            gameOver=false
             playGame()
             break;
   
@@ -54,11 +60,15 @@ window.addEventListener("keydown",(key)=>{
 
 layout()
 snakeLayout(snake)
-let food = foodApear([pixels/2,pixels/2])
+let food = foodApear([pixels/2,3])
+
+document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
+playGame()
 
 function layout(){
     for(let x =0;x<pixels;x++){
         for(let y =0; y<pixels;y++){
+            foodArray.push([x,y])
             let square = document.createElement("div")
             square.classList.add("square")
             square.id = "x"+x+"y"+y
@@ -67,6 +77,7 @@ function layout(){
             container_game.appendChild(square)
         }
     }  
+    
 }
 
 function snakeLayout(snake){
@@ -87,18 +98,25 @@ function snakeMovement(snake, mode){
     let newSnakeHead = mode(snakeHead)
 
     for(let key =0;key<snake.length;key++){
-
-        if(newSnakeHead[0]==snake[key][0]&&newSnakeHead[1]==snake[key][1]){
+       
+        if(newSnakeHead[0]==snake[key][0]&&newSnakeHead[1]==snake[key][1]
+            ){
             gameOver=true
             return
         }
     }
+    
     if(newSnakeHead[0] == food[0] && newSnakeHead[1] == food[1]){
         oldFood = food
-        food = foodApear(food)
+        food = foodApear(newSnakeHead)
+        
+        document.querySelector(`#${"x"+oldFood[0]+"y"+oldFood[1]}`).classList.remove("food")
+        document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
+        
         score++
         scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
     }
+    
     if (newSnakeHead[0]>pixels-1||
         newSnakeHead[0]<0||
         newSnakeHead[1]>pixels-1||
@@ -109,7 +127,9 @@ function snakeMovement(snake, mode){
         }
     
     snake.push(newSnakeHead)
+    document.querySelector(`#${"x"+snakeHead[0]+"y"+snakeHead[1]}`).classList.remove("head")
     document.querySelector(`#${"x"+newSnakeHead[0]+"y"+newSnakeHead[1]}`).classList.add("snake")
+    document.querySelector(`#${"x"+newSnakeHead[0]+"y"+newSnakeHead[1]}`).classList.add("head")
     if(snakeTail[0] == oldFood[0] && snakeTail[1] == oldFood[1]){
         oldFood = [-1,-1]
     }
@@ -121,24 +141,8 @@ function snakeMovement(snake, mode){
     return snake
 }
 
-function foodApear(food){
-    
-    let rndIntX = randomIntFromInterval(0, pixels-1)
-    let rndIntY = randomIntFromInterval(0, pixels-1)
-    let newFood = [rndIntX,rndIntY]
 
-    
-    if(rndIntX==food[0]&&rndIntY==food[1]){foodApear(food)}
-    document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.remove("food")
-    document.querySelector(`#${"x"+rndIntX+"y"+rndIntY}`).classList.add("food")
-    for(let key =0;key<snake.length;key++){
 
-        if(newFood[0]==snake[key][0]&&newFood[1]==snake[key][1]){
-            foodApear(newFood)
-        }
-    }
-    return food = newFood
-}
 
 function moveRight([x,y]){
     return [x,y+1]
@@ -155,8 +159,48 @@ function moveUp([x,y]){
     return [x-1,y]
 }
 
-function randomIntFromInterval(min, max) { // min and max included 
-    return Math.floor(Math.random() * (max - min + 1) + min)
-  }
+function foodApear(sneakHead) {
+    let excluded=[sneakHead[0]*pixels+sneakHead[1]]
+    const randNum = (min, max, exclude = []) => {
+        let num = Math.floor(Math.random() * (max - min + 1 - exclude.length) + min);
+        exclude
+          .slice()
+          .sort((a, b) => a - b)
+          .every((exeption) => exeption <= num && (num++, true));
+        return num;
+      };
+    
+    let newArray = [...foodArray]
+    for(let key in snake){
+        //console.log(snake[key][0]*pixels+" + "+snake[key][1]+"=")
+        //console.log("num "+(snake[key][0]*pixels+snake[key][1]))
+        excluded.push(snake[key][0]*pixels+snake[key][1])
+    }
+    let pick = randNum(0,foodArray.length-1,excluded)
+    console.log(excluded)
+    console.log(pick)
+    return newArray[pick]
+}
   
+function restart(){
+    
+    let squares = document.querySelectorAll(".square")
+    squares.forEach(square=>  square.remove())
+    
+    score = 0
+    scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
+    oldFood = [-1,-1]
+    mode = moveRight
+    fo
 
+    
+    layout()
+    snake = [[pixels/2,0],[pixels/2,1],[pixels/2,2]]
+    gameOver = false
+    snakeLayout(snake)
+    food = foodApear([pixels/2,pixels/2+2])
+    document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
+    playGame()
+    
+
+}
