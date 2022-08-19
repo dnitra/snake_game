@@ -1,22 +1,29 @@
 const container_game = document.querySelector(".container_game")
+const width = container_game.clientWidth
+console.log(width)
 const restartButton = document.querySelector("#restartButton")
+const startButton = document.querySelector("#start")
 let scoreDiv = document.querySelector(".score")
 let highScoreDiv = document.querySelector(".highestScore")
 const square = document.createElement("div")
 let foodArray = []
-let pixels = 10;
+let pixels = 12;
 const gameSpeedArray = [140,120,100,90,80]
 let speedMode = 0
 let gameSpeed = gameSpeedArray[speedMode]
 let oldFood = []
 let highestScore =0
 let score = 0
-scoreDiv.textContent = "Score: "+ score
-highScoreDiv.textContent = "Highest score: "+ highestScore
-restartButton.addEventListener("click",restart)
+
 let snake = [[pixels/2,0],[pixels/2,1],[pixels/2,2]]
 let mode = moveRight
 let gameOver = false
+
+scoreDiv.textContent = "Score: "+ score
+highScoreDiv.textContent = "Highest score: "+ highestScore
+restartButton.addEventListener("mousedown",restart)
+startButton.addEventListener("mousedown",playGame)
+
 
 
 
@@ -34,9 +41,10 @@ function playGame(){
         snakeMovement(snake,mode)
          
       }, gameSpeed)
-    }
+}
 
 window.addEventListener("keydown",(key)=>{ 
+    console.log(key.key)
     switch(key.key){
         case "ArrowDown":
             mode= moveDown
@@ -73,8 +81,11 @@ function layout(){
             let square = document.createElement("div")
             square.classList.add("square")
             square.id = "x"+x+"y"+y
-            square.style.cssText += `width: ${600/pixels}px;`
-            square.style.cssText += `height: ${600/pixels}px;`
+            square.style.cssText += 
+            `min-width: ${100/pixels}%;
+            position: relative;
+            height: 0;
+            padding-bottom: ${100/pixels}%;`
             container_game.appendChild(square)
         }
     }  
@@ -119,7 +130,7 @@ function snakeMovement(snake, mode){
         if(newSnakeHead[0] == food[0] && newSnakeHead[1] == food[1]){
             
             oldFood.push(food)
-            console.log(oldFood)
+           
             food = foodApear(newSnakeHead)
             
             document.querySelector(`#${"x"+oldFood[oldFood.length-1][0]+"y"+oldFood[oldFood.length-1][1]}`).classList.remove("food")
@@ -218,6 +229,75 @@ function restart(){
     document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
 
   
-    playGame()
+
 
 }
+
+function swipedetect(el, callback){
+  
+    var touchsurface = el,
+    swipedir,
+    startX,
+    startY,
+    distX,
+    distY,
+    threshold = 150, //required min distance traveled to be considered swipe
+    restraint = 100, // maximum distance allowed at the same time in perpendicular direction
+    allowedTime = 300, // maximum time allowed to travel that distance
+    elapsedTime,
+    startTime,
+    handleswipe = callback || function(swipedir){}
+  
+    touchsurface.addEventListener('touchstart', function(e){
+        var touchobj = e.changedTouches[0]
+        swipedir = 'none'
+        dist = 0
+        startX = touchobj.pageX
+        startY = touchobj.pageY
+        startTime = new Date().getTime() // record time when finger first makes contact with surface
+        e.preventDefault()
+    }, false)
+  
+    touchsurface.addEventListener('touchmove', function(e){
+        e.preventDefault() // prevent scrolling when inside DIV
+    }, false)
+  
+    touchsurface.addEventListener('touchend', function(e){
+        var touchobj = e.changedTouches[0]
+        distX = touchobj.pageX - startX // get horizontal dist traveled by finger while in contact with surface
+        distY = touchobj.pageY - startY // get vertical dist traveled by finger while in contact with surface
+        elapsedTime = new Date().getTime() - startTime // get time elapsed
+        if (elapsedTime <= allowedTime){ // first condition for awipe met
+            if (Math.abs(distX) >= threshold && Math.abs(distY) <= restraint){ // 2nd condition for horizontal swipe met
+                swipedir = (distX < 0)? 'left' : 'right' // if dist traveled is negative, it indicates left swipe
+            }
+            else if (Math.abs(distY) >= threshold && Math.abs(distX) <= restraint){ // 2nd condition for vertical swipe met
+                swipedir = (distY < 0)? 'up' : 'down' // if dist traveled is negative, it indicates up swipe
+            }
+        }
+        handleswipe(swipedir)
+        e.preventDefault()
+    }, false)
+}
+  
+
+swipedetect(container_game, function(swipedir){
+   
+    switch(swipedir){
+        case "down":
+            mode= moveDown
+            break;
+        case "top":
+            mode= moveUp
+            break;
+        case "left":
+            mode= moveLeft
+            break;
+        case "right":
+            mode= moveRight
+            break;
+        
+
+    }
+})
+

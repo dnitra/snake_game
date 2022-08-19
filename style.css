@@ -1,6 +1,7 @@
 body{
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 30px;
     font-family:Verdana, Geneva, Tahoma, sans-serif
 }
@@ -9,7 +10,7 @@ body{
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    min-width: 150px;
+    width: 150px;
     gap: 15px;
 }
 .score{
@@ -20,8 +21,10 @@ body{
 
 }
 .container_game{
-    width: 600px;
-    height: 600px;
+    position: relative;
+    min-width: 40%;
+    height: 0;
+    padding-bottom: 40%;
     display: flex;
     flex-wrap: wrap;
     border: 2px solid black;
