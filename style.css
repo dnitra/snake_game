@@ -2,15 +2,22 @@ body{
     display: flex;
     justify-content: center;
     gap: 30px;
+    font-family:Verdana, Geneva, Tahoma, sans-serif
 }
 .container{
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    min-width: 150px;
+    gap: 15px;
 }
 .score{
     font-size: 20px;
+}
+.highestScore{
+    font-size: 15px;
+
 }
 .container_game{
     width: 600px;
@@ -31,6 +38,9 @@ body{
 
 .head{
     background-color: grey;
+}
+.headCrash{
+    background-color: red;
 }
 
 .food{

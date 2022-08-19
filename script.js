@@ -1,27 +1,34 @@
 const container_game = document.querySelector(".container_game")
 const restartButton = document.querySelector("#restartButton")
 let scoreDiv = document.querySelector(".score")
+let highScoreDiv = document.querySelector(".highestScore")
 const square = document.createElement("div")
 let foodArray = []
 let pixels = 10;
-const gameSpeed = 100
+const gameSpeedArray = [140,120,100,90,80]
+let speedMode = 0
+let gameSpeed = gameSpeedArray[speedMode]
 let oldFood = [-1,-1]
+let highestScore =0
 let score = 0
-scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
+scoreDiv.textContent = "Score: "+ score
+highScoreDiv.textContent = "Highest score: "+ highestScore
 restartButton.addEventListener("click",restart)
-
-
 let snake = [[pixels/2,0],[pixels/2,1],[pixels/2,2]]
-
-
 let mode = moveRight
 let gameOver = false
 
 
+
+
+
 function playGame(){
+     
     let game = setInterval(()=>{
  
         if(gameOver){
+            
+            document.querySelector(`#${"x"+snake[snake.length-1][0]+"y"+snake[snake.length-1][1]}`).classList.add("headCrash")
             clearInterval(game)
         }
         snakeMovement(snake,mode)
@@ -29,10 +36,7 @@ function playGame(){
       }, gameSpeed)
     }
 
-
-
-window.addEventListener("keydown",(key)=>{
-    
+window.addEventListener("keydown",(key)=>{ 
     switch(key.key){
         case "ArrowDown":
             mode= moveDown
@@ -50,20 +54,17 @@ window.addEventListener("keydown",(key)=>{
             gameOver=true 
             break;
         case "Enter":
-            gameOver=false
-            playGame()
+            if(gameOver){
+                gameOver=false
+                document.querySelector(`#${"x"+snake[snake.length-1][0]+"y"+snake[snake.length-1][1]}`).classList.remove("headCrash")
+                playGame()
+            }
             break;
-  
-        
     }
 })
 
-layout()
-snakeLayout(snake)
-let food = foodApear([pixels/2,3])
+restart()
 
-document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
-playGame()
 
 function layout(){
     for(let x =0;x<pixels;x++){
@@ -85,7 +86,9 @@ function snakeLayout(snake){
     const squares = document.querySelectorAll("square")
     for(let x =0;x<snake.length;x++){
         document.querySelector(`#${"x"+snake[x][0]+"y"+snake[x][1]}`).classList.add("snake")
+        
     }
+    document.querySelector(`#${"x"+snake[snake.length-1][0]+"y"+snake[snake.length-1][1]}`).classList.add("head")
     
 }
 
@@ -97,7 +100,7 @@ function snakeMovement(snake, mode){
 
     let newSnakeHead = mode(snakeHead)
 
-    for(let key =0;key<snake.length;key++){
+    for(let key =1;key<snake.length;key++){
        
         if(newSnakeHead[0]==snake[key][0]&&newSnakeHead[1]==snake[key][1]
             ){
@@ -106,43 +109,46 @@ function snakeMovement(snake, mode){
         }
     }
     
-    if(newSnakeHead[0] == food[0] && newSnakeHead[1] == food[1]){
-        oldFood = food
-        food = foodApear(newSnakeHead)
-        
-        document.querySelector(`#${"x"+oldFood[0]+"y"+oldFood[1]}`).classList.remove("food")
-        document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
-        
-        score++
-        scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
+    if (newSnakeHead[0]>pixels-1 || newSnakeHead[0]<0 || newSnakeHead[1]>pixels-1 || newSnakeHead[1]<0){
+            gameOver=true 
+            return
     }
     
-    if (newSnakeHead[0]>pixels-1||
-        newSnakeHead[0]<0||
-        newSnakeHead[1]>pixels-1||
-        newSnakeHead[1]<0
-        ){
-        gameOver=true 
-        return
+    if(!gameOver){
+        if(newSnakeHead[0] == food[0] && newSnakeHead[1] == food[1]){
+            oldFood = food
+            food = foodApear(newSnakeHead)
+            
+            document.querySelector(`#${"x"+oldFood[0]+"y"+oldFood[1]}`).classList.remove("food")
+            document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
+            
+            score++
+            scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
+            if(score%10 == 0 &&speedMode < gameSpeedArray.length-1) {
+                speedMode++
+                gameSpeed = gameSpeedArray[speedMode]
+            }
+            if(score >= highestScore){
+                highestScore = score
+                document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
+            }
         }
-    
-    snake.push(newSnakeHead)
-    document.querySelector(`#${"x"+snakeHead[0]+"y"+snakeHead[1]}`).classList.remove("head")
-    document.querySelector(`#${"x"+newSnakeHead[0]+"y"+newSnakeHead[1]}`).classList.add("snake")
-    document.querySelector(`#${"x"+newSnakeHead[0]+"y"+newSnakeHead[1]}`).classList.add("head")
-    if(snakeTail[0] == oldFood[0] && snakeTail[1] == oldFood[1]){
-        oldFood = [-1,-1]
+        if(snakeTail[0] == oldFood[0] && snakeTail[1] == oldFood[1]){
+            oldFood = [-1,-1]
+        }
+        else{
+            snake.shift()
+            document.querySelector(`#${"x"+snakeTail[0]+"y"+snakeTail[1]}`).classList.remove("snake")
+        }
+        snake.push(newSnakeHead)
+        document.querySelector(`#${"x"+snakeHead[0]+"y"+snakeHead[1]}`).classList.remove("head")
+        document.querySelector(`#${"x"+newSnakeHead[0]+"y"+newSnakeHead[1]}`).classList.add("snake")
+        document.querySelector(`#${"x"+newSnakeHead[0]+"y"+newSnakeHead[1]}`).classList.add("head")
+        
     }
-    else{
-        snake.shift()
-        document.querySelector(`#${"x"+snakeTail[0]+"y"+snakeTail[1]}`).classList.remove("snake")
-   }
     
     return snake
 }
-
-
-
 
 function moveRight([x,y]){
     return [x,y+1]
@@ -172,13 +178,10 @@ function foodApear(sneakHead) {
     
     let newArray = [...foodArray]
     for(let key in snake){
-        //console.log(snake[key][0]*pixels+" + "+snake[key][1]+"=")
-        //console.log("num "+(snake[key][0]*pixels+snake[key][1]))
         excluded.push(snake[key][0]*pixels+snake[key][1])
     }
     let pick = randNum(0,foodArray.length-1,excluded)
-    console.log(excluded)
-    console.log(pick)
+    
     return newArray[pick]
 }
   
@@ -186,12 +189,14 @@ function restart(){
     
     let squares = document.querySelectorAll(".square")
     squares.forEach(square=>  square.remove())
-    
+    speedMode=0
+    gameSpeed = gameSpeedArray[speedMode]
     score = 0
     scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
+    
     oldFood = [-1,-1]
     mode = moveRight
-    fo
+    foodArray = []
 
     
     layout()
@@ -200,7 +205,8 @@ function restart(){
     snakeLayout(snake)
     food = foodApear([pixels/2,pixels/2+2])
     document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
+
+  
     playGame()
-    
 
 }
