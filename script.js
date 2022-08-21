@@ -1,13 +1,19 @@
 const container_game = document.querySelector(".container_game")
-const width = container_game.clientWidth
+
 const arrowbuttons = document.querySelectorAll(".arrows")
 const restartButton = document.querySelector("#restartButton")
 const startButton = document.querySelector("#start")
 let scoreDiv = document.querySelector(".score")
 let highScoreDiv = document.querySelector(".highestScore")
 const square = document.createElement("div")
+
+
 let foodArray = []
-let pixels = 12;
+const totalPixels = 1000;
+
+let pixelsX = 0;
+let pixelsY = 0
+
 const gameSpeedArray = [140,120,100,90,80]
 let speedMode = 0
 let gameSpeed = gameSpeedArray[speedMode]
@@ -15,12 +21,10 @@ let oldFood = []
 let highestScore =0
 let score = 0
 
-let snake = [[pixels/2,0],[pixels/2,1],[pixels/2,2]]
+let snake = [[pixelsY/2,0],[pixelsY/2,1],[pixelsY/2,2]]
 let mode = moveRight
 let gameOver = false
 
-scoreDiv.textContent = "Score: "+ score
-highScoreDiv.textContent = "Highest score: "+ highestScore
 restartButton.addEventListener("mousedown",restart)
 startButton.addEventListener("mousedown",playGame)
 
@@ -62,17 +66,34 @@ function playGame(){
 }
 
 function layout(){
-    for(let x =0;x<pixels;x++){
-        for(let y =0; y<pixels;y++){
+    let width = container_game.clientWidth
+    let widthGame =container_game.offsetWidth
+    let heightGame = container_game.offsetHeight
+
+    let screenPixels = widthGame*heightGame
+    let ratio = widthGame/heightGame
+
+    //totalPixels = pixelsX*pixelsY
+    //pixelsX/pixelsY = widthGame/heightGamr
+
+    
+    pixelsX =Math.round(Math.sqrt(ratio *totalPixels))
+    pixelsY = Math.round((totalPixels/pixelsX))
+
+    console.log(pixelsX*pixelsY)
+  
+  
+    
+    for(let x =0;x<pixelsY;x++){
+        for(let y =0; y<pixelsX;y++){
             foodArray.push([x,y])
             let square = document.createElement("div")
             square.classList.add("square")
             square.id = "x"+x+"y"+y
             square.style.cssText += 
-            `min-width: ${100/pixels}%;
-            position: relative;
-            height: 0;
-            padding-bottom: ${100/pixels}%;`
+            `min-width: ${100/pixelsX}%;
+
+            max-height: ${100/pixelsX}`
             container_game.appendChild(square)
         }
     }  
@@ -107,7 +128,7 @@ function snakeMovement(snake, mode){
         }
     }
     
-    if (newSnakeHead[0]>pixels-1 || newSnakeHead[0]<0 || newSnakeHead[1]>pixels-1 || newSnakeHead[1]<0){
+    if (newSnakeHead[0]>pixelsY-1 || newSnakeHead[0]<0 || newSnakeHead[1]>pixelsX-1 || newSnakeHead[1]<0){
             gameOver=true 
             return
     }
@@ -175,7 +196,7 @@ function moveUp([x,y]){
 }
 
 function foodApear(sneakHead) {
-    let excluded=[sneakHead[0]*pixels+sneakHead[1]]
+    let excluded=[sneakHead[0]*pixelsX+sneakHead[1]]
     const randNum = (min, max, exclude = []) => {
         let num = Math.floor(Math.random() * (max - min + 1 - exclude.length) + min);
         exclude
@@ -187,7 +208,7 @@ function foodApear(sneakHead) {
     
     let newArray = [...foodArray]
     for(let key in snake){
-        excluded.push(snake[key][0]*pixels+snake[key][1])
+        excluded.push(snake[key][0]*pixelsX+snake[key][1])
     }
     let pick = randNum(0,foodArray.length-1,excluded)
     
@@ -197,6 +218,9 @@ function foodApear(sneakHead) {
 function restart(){
     
     let squares = document.querySelectorAll(".square")
+
+    scoreDiv.textContent = "Score: "+ score
+    highScoreDiv.textContent = "Highest score: "+ highestScore
     squares.forEach(square=>  square.remove())
     speedMode=0
     gameSpeed = gameSpeedArray[speedMode]
@@ -209,10 +233,10 @@ function restart(){
 
     
     layout()
-    snake = [[pixels/2,0],[pixels/2,1],[pixels/2,2]]
+    snake = [[Math.floor(pixelsY/2),0],[Math.floor(pixelsY/2),1],[Math.floor(pixelsY/2),2]]
     gameOver = false
     snakeLayout(snake)
-    food = foodApear([pixels/2,pixels/2+2])
+    food = foodApear([pixelsY/2,pixelsY/2+2])
     document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
 
 }
