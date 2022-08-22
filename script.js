@@ -1,6 +1,4 @@
 const container_game = document.querySelector(".container_game")
-
-const arrowbuttons = document.querySelectorAll(".arrows")
 const restartButton = document.querySelector("#restartButton")
 const startButton = document.querySelector("#start")
 let scoreDiv = document.querySelector(".score")
@@ -28,8 +26,9 @@ let gameOver = false
 restartButton.addEventListener("mousedown",restart)
 startButton.addEventListener("mousedown",playGame)
 
+/*
 arrowbuttons.forEach(arrow=>arrow.addEventListener("click",(e)=>{
-    console.log(e.target.value)
+    
     switch(e.target.value){
         case "ArrowDown":
             mode= moveDown
@@ -45,11 +44,22 @@ arrowbuttons.forEach(arrow=>arrow.addEventListener("click",(e)=>{
             break;
     }
 }))
-
-
-window.addEventListener("keydown",keyPressed)
+*/
 
 restart()
+window.addEventListener("keydown",keyPressed)
+document.querySelectorAll(".square").forEach(square=>square.addEventListener("mousedown",(e)=>{
+  
+    let targetId = e.target.id
+}))
+
+document.querySelectorAll(".ArrowDown").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveDown));
+document.querySelectorAll(".ArrowLeft").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveLeft));
+document.querySelectorAll(".ArrowRight").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveRight));
+document.querySelectorAll(".ArrowUp").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveUp));
+
+
+
 
 function playGame(){
      
@@ -80,15 +90,27 @@ function layout(){
     pixelsX =Math.round(Math.sqrt(ratio *totalPixels))
     pixelsY = Math.round((totalPixels/pixelsX))
 
-    console.log(pixelsX*pixelsY)
-  
-  
     
+
     for(let x =0;x<pixelsY;x++){
         for(let y =0; y<pixelsX;y++){
             foodArray.push([x,y])
             let square = document.createElement("div")
             square.classList.add("square")
+            if(x>pixelsY/5&&y>=pixelsX/2&&x<pixelsY*(4/5)){
+                square.classList.add("ArrowRight")
+            }  
+            else if(x<=pixelsY/5){
+                square.classList.add("ArrowUp")
+            }
+            else if(x>pixelsY/5&&y<pixelsX/2&&x<pixelsY*(4/5)){
+                square.classList.add("ArrowLeft")
+            }
+            else if(x>=pixelsY*4/5){
+                square.classList.add("ArrowDown")
+            }
+           
+
             square.id = "x"+x+"y"+y
             square.style.cssText += 
             `min-width: ${100/pixelsX}%;
