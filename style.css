@@ -9,13 +9,56 @@ body{
     
 
 }
+#help{
+    background-color: blue;
+    color: white;
+    font-size: 2vw; 
+    width: 3%;
+    aspect-ratio: 1/1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+#help:hover {
+    background-color: white;
+    cursor: pointer;
+    color: black;
+    
+}
+
+#help-content {
+    display: none;
+    position: absolute;
+    text-align: center;
+    top: 70px;
+    left: 10%;
+    background-color: #050505;
+    color: white;
+    font-size: 3vw;
+    width: 60%;
+    box-shadow: 0px 8px 16px 0px rgba(164, 164, 164, 0.2);
+    z-index: 1;
+  }
+
+#help:hover #help-content , #help:focus #help-content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    
+   
+}
+
+
 .container{
     background-color: blue;
     display: flex;
     justify-content: center;
     align-items: center;
     align-items: center;
-    gap: 5%;
+    gap: 3%;
    
     width: 100%;
     height: 70px;
@@ -23,7 +66,7 @@ body{
 
 
 .score{
-    font-size: 4vw;
+    font-size: 3vw;
 }
 .highestScore{
     font-size: 3vw;
@@ -34,11 +77,15 @@ body{
     display: flex;
     flex-wrap: wrap;
     position: absolute;
+   
     width: 100%;
     top: 70px;
     bottom: 0;
     background-color: black;
 
+}
+img{
+    width: 30%;
 }
 /*
 .ArrowUp{
