@@ -40,13 +40,40 @@ body{
     background-color: black;
 
 }
+/*
+.ArrowUp{
+    background-color: white;
+}
+.ArrowLeft{
+    background-color: purple;
+}
 
+.ArrowDown{
+    background-color: rgb(0, 255, 251);
+}
+
+.ArrowRight{
+    background-color: red;
+}
+*/
 
 button{
-    background-color: white;
+    background-color: blue;
+    color: white;
     border: none;
     font-size: 3vw;
- 
+    height: 70px;
+}
+button:hover{
+    background-color: white;
+    cursor: pointer;
+    color: black;
+}
+button:focus{
+    outline: none;
+    background: blue;
+    color: white;
+
 }
 
 .snake{

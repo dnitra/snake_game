@@ -1,65 +1,47 @@
 const container_game = document.querySelector(".container_game")
-const restartButton = document.querySelector("#restartButton")
+const container = document.querySelector(".container")
+const restartButton = document.createElement("button") 
+restartButton.id = "restartButton"
+restartButton.textContent = "Restart"
+
+    
 const startButton = document.querySelector("#start")
+const sizeButton = document.querySelector("#size")
 let scoreDiv = document.querySelector(".score")
 let highScoreDiv = document.querySelector(".highestScore")
-const square = document.createElement("div")
+
+let speedMode, gameSpeed, foodArray, pixelsX, pixelsY, oldFood, score, snake, gameOver
 
 
-let foodArray = []
-const totalPixels = 1000;
-
-let pixelsX = 0;
-let pixelsY = 0
-
-const gameSpeedArray = [140,120,100,90,80]
-let speedMode = 0
-let gameSpeed = gameSpeedArray[speedMode]
-let oldFood = []
-let highestScore =0
-let score = 0
-
-let snake = [[pixelsY/2,0],[pixelsY/2,1],[pixelsY/2,2]]
+const gameSpeedArray = [200,150,120,80,60]
+const pixelsArray = [150,400,1000]
+let totalPixels = pixelsArray[1] 
 let mode = moveRight
-let gameOver = false
+let highestScore = 0
+let gameStart = false
 
 restartButton.addEventListener("mousedown",restart)
-startButton.addEventListener("mousedown",playGame)
-
-/*
-arrowbuttons.forEach(arrow=>arrow.addEventListener("click",(e)=>{
+window.addEventListener("keydown",keyPressed)
+sizeButton.addEventListener("click",(e)=>{
     
-    switch(e.target.value){
-        case "ArrowDown":
-            mode= moveDown
-            break;
-        case "ArrowUp":
-            mode= moveUp
-            break;
-        case "ArrowLeft":
-            mode= moveLeft
-            break;
-        case "ArrowRight":
-            mode= moveRight
-            break;
+    let content = e.target.textContent
+    console.log(content)
+    if(content == "Medium size"){
+        e.target.textContent = "Large size"
+        totalPixels = pixelsArray[2]
     }
-}))
-*/
+    if(content == "Large size"){
+        e.target.textContent = "Small size"
+        totalPixels = pixelsArray[0]
+    }
+    if(content == "Small size"){
+        e.target.textContent = "Medium size"
+        totalPixels = pixelsArray[1]
+    }
+    restart()
+})
 
 restart()
-window.addEventListener("keydown",keyPressed)
-document.querySelectorAll(".square").forEach(square=>square.addEventListener("mousedown",(e)=>{
-  
-    let targetId = e.target.id
-}))
-
-document.querySelectorAll(".ArrowDown").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveDown));
-document.querySelectorAll(".ArrowLeft").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveLeft));
-document.querySelectorAll(".ArrowRight").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveRight));
-document.querySelectorAll(".ArrowUp").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveUp));
-
-
-
 
 function playGame(){
      
@@ -71,55 +53,57 @@ function playGame(){
             clearInterval(game)
         }
         snakeMovement(snake,mode)
+        if(gameOver){container.appendChild(restartButton)}
+        
          
       }, gameSpeed)
+      
 }
 
 function layout(){
     let width = container_game.clientWidth
     let widthGame =container_game.offsetWidth
     let heightGame = container_game.offsetHeight
-
-    let screenPixels = widthGame*heightGame
     let ratio = widthGame/heightGame
-
-    //totalPixels = pixelsX*pixelsY
-    //pixelsX/pixelsY = widthGame/heightGamr
-
     
     pixelsX =Math.round(Math.sqrt(ratio *totalPixels))
     pixelsY = Math.round((totalPixels/pixelsX))
-
-    
 
     for(let x =0;x<pixelsY;x++){
         for(let y =0; y<pixelsX;y++){
             foodArray.push([x,y])
             let square = document.createElement("div")
             square.classList.add("square")
-            if(x>pixelsY/5&&y>=pixelsX/2&&x<pixelsY*(4/5)){
+            
+            if(x>pixelsY/4&&y>=pixelsX/2&&x<pixelsY*(3/4)){
                 square.classList.add("ArrowRight")
             }  
-            else if(x<=pixelsY/5){
+            else if(x<=pixelsY/4){
                 square.classList.add("ArrowUp")
             }
-            else if(x>pixelsY/5&&y<pixelsX/2&&x<pixelsY*(4/5)){
+            else if(x>pixelsY/4&&y<pixelsX/2&&x<pixelsY*(3/4)){
                 square.classList.add("ArrowLeft")
             }
-            else if(x>=pixelsY*4/5){
+            else {
                 square.classList.add("ArrowDown")
             }
-           
-
             square.id = "x"+x+"y"+y
             square.style.cssText += 
-            `min-width: ${100/pixelsX}%;
-
-            max-height: ${100/pixelsX}`
+                `min-width: ${100/pixelsX}%;
+                max-height: ${100/pixelsX}`
             container_game.appendChild(square)
         }
     }  
-    
+    document.querySelectorAll(".ArrowDown").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveDown));
+    document.querySelectorAll(".ArrowLeft").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveLeft));
+    document.querySelectorAll(".ArrowRight").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveRight));
+    document.querySelectorAll(".ArrowUp").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveUp));
+    document.querySelectorAll(".square").forEach(arrow => arrow.addEventListener("mousedown",()=>{
+        if(!gameStart){
+            gameStart = true
+            playGame()
+        }
+    }));
 }
 
 function snakeLayout(snake){
@@ -238,6 +222,12 @@ function foodApear(sneakHead) {
 }
   
 function restart(){
+    if(gameOver){
+        let node = document.getElementById("restartButton");
+        if (node.parentNode) {
+        node.parentNode.removeChild(node);
+        }
+    }
     
     let squares = document.querySelectorAll(".square")
 
@@ -257,6 +247,7 @@ function restart(){
     layout()
     snake = [[Math.floor(pixelsY/2),0],[Math.floor(pixelsY/2),1],[Math.floor(pixelsY/2),2]]
     gameOver = false
+    gameStart= false
     snakeLayout(snake)
     food = foodApear([pixelsY/2,pixelsY/2+2])
     document.querySelector(`#${"x"+food[0]+"y"+food[1]}`).classList.add("food")
@@ -264,7 +255,10 @@ function restart(){
 }
 
 function keyPressed (key){
-  
+    if(!gameStart){
+        gameStart = true
+        playGame()
+    }
     switch(key.key){
         case "ArrowDown":
             mode= moveDown
@@ -277,16 +271,6 @@ function keyPressed (key){
             break;
         case "ArrowRight":
             mode= moveRight
-            break;
-        case "Escape":
-            gameOver=true 
-            break;
-        case "Enter":
-            if(gameOver){
-                gameOver=false
-                document.querySelector(`#${"x"+snake[snake.length-1][0]+"y"+snake[snake.length-1][1]}`).classList.remove("headCrash")
-                playGame()
-            }
             break;
     }
 }
