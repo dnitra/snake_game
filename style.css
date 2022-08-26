@@ -155,4 +155,9 @@ button:focus{
     -ms-user-select: none;
     -o-user-select: none;
     user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    
 }

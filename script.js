@@ -37,10 +37,12 @@ let score = 0
 scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
 let gameOver = false
 let gameArray =[]
+let pathArray =[]
 let filledArray = []
 let foodArray = []
 let oldFood = []
-
+let botVisibility =5
+let barrier = 20
 const gameSpeedArray = [200,150,120,80,60]
 let gameSpeed = gameSpeedArray[0]
 const pixelsArray = [150,400,1000]
@@ -48,6 +50,9 @@ let gamerPixels = pixelsArray[1]
 let mode = moveRight
 let highestScore = 0
 let gameStart = true
+let count=0
+let count2=0
+
 
 restartButton.addEventListener("mousedown",restart)
 window.addEventListener("keydown",keyPressed)
@@ -67,17 +72,22 @@ sizeButton.addEventListener("click",(e)=>{
         e.target.textContent = "Medium size"
         gamerPixels = pixelsArray[1]
     }
-    restart()
+    //restart()
 })
 
-//restart()
+//restart////////////////////
+
 snake = [[totalPixels/2,totalPixels/2-2],[totalPixels/2,totalPixels/2-1],[totalPixels/2,totalPixels/2]]
 totalLayout(totalPixels, gameArray)
 
+for(let i=0;i<initialFood;i++){
+    foodArray.push(foodApear())
+}
+
 createSnake(snake)
 playGame()
-//console.log(gameArray)
 
+///////////////////////////
 
 function playGame(){
      
@@ -88,10 +98,10 @@ function playGame(){
             clearInterval(game)
         }*/
         //snakeMovement(snake,mode)
-        console.log(snake[snake.length-1])
-        gamerLayout(snake[snake.length-1])
-        botSnakeMovement(snake)
+      
         
+        botSnakeMovement(snake)
+        gamerLayout(snake[snake.length-1])
         if(gameOver){container.appendChild(restartButton)}
         
          
@@ -101,23 +111,19 @@ function playGame(){
 }
 
 function totalLayout(pixels,arr){
-
     for(let x = 0; x<pixels;x++){
         arr.push([])
+        pathArray.push([])
         for(let y = 0; y<pixels;y++){
             
             arr[x].length++
+            pathArray[x].push(0)
             if(x==0||x==totalPixels==-1||y==0||y==totalPixels-1){
-                gameArray[x].splice(y,1,"border")
-            }
-            filledArray.push([x,y])
+                arr[x].splice(y,1,"border")
+                pathArray[x].splice(y,1,-barrier)
+            }   
         }
-
     }
-    for(let i=0;i<initialFood;i++){
-        foodArray.push(foodApear())
-    }
-
     return arr
 }
 
@@ -125,50 +131,21 @@ function totalLayout(pixels,arr){
 
 function botSnakeMovement(snakeBot){
     const botHead = snake[snake.length-1]
-    const food = botSearchFood(botHead)
-
-    console.log(`food ${food}`)
-    let mode =  choosDirection(botHead,food)
+    const mode = botSearchPath(botHead)
     
     
-    function choosDirection(botHead,food){
-        const dirOptionX = botHead[0]-food[0]
-        const dirOptionY = botHead[1]-food[1]
-        if(dirOptionX>dirOptionY){
-            if(dirOptionX>0) return moveUp
-            else return moveRight
-            
-        }
-        else{
-            if(dirOptionY>0) return moveLeft
-            else return moveDown
-        }
-       
-    }
     
-    
-    function botSearchFood(botHead){
+    function botSearchPath(botHead){
      
-        let visibility =10
-        for(let x =1;x<=visibility;x++){
-            if(gameArray[botHead[0]+x][botHead[1]]=="food"){
-          
-                return [botHead[0]+x,botHead[1]]
-            }
-            if(gameArray[botHead[0]-x][botHead[1]]=="food"){
-              
-                return [botHead[0]-x,botHead[1]]
-            }
-            if(gameArray[botHead[0]][botHead[1]+x]=="food"){
-            
-                return [botHead[0],botHead[1]+x]
-            }
-            if(gameArray[botHead[0]][botHead[1]-x]=="food"){
-                
-                return [botHead[0],botHead[1]-x]
-            }
-        }
-        return [botHead[0]+random(-10,10),botHead[1]+random(-10,10)]
+        const searchArray = [[pathArray[botHead[0]+1][botHead[1]],moveDown],[pathArray[botHead[0]][botHead[1]+1],moveRight],[pathArray[botHead[0]-1][botHead[1]],moveUp],[pathArray[botHead[0]][botHead[1]-1],moveLeft]].sort((a,b)=>b[0]-a[0]) 
+        console.log(searchArray)
+        if(searchArray[0][0]==searchArray[1][0]==searchArray[2][0]) return searchArray[random(0,2)][1]
+        if(searchArray[0][0]==searchArray[1][0]) return searchArray[random(0,1)][1]
+        if(searchArray[0][0]>=0)return searchArray[0][1]
+        if(searchArray[1][0]>=0)return searchArray[1][1]
+        if(searchArray[2][0]>=0)return searchArray[2][1]
+        return searchArray[3][1]
+        
     }
         
     return snakeMovement(snake, mode)
@@ -200,6 +177,7 @@ function gamerLayout(snakeHead){
             let square = document.createElement("div")
             square.classList.add("square")
             square.id = "x"+(x+startIndex_X)+"y"+(y+startIndex_Y)
+            square.textContent = pathArray[x+startIndex_X][y+startIndex_Y]
             square.style.cssText += 
                 `min-width: ${100/pixelsX}%;
                 max-height: ${100/pixelsX}`
@@ -254,7 +232,10 @@ function random (min, max) {return Math.floor(Math.random() * (max - min)) + min
 
 function createSnake(snakeArr){
 
-    snakeArr.forEach(el => gameArray[el[0]].splice(el[1],1,"snake"))
+    snakeArr.forEach(el => {
+        let pathValue = pathArray[el[0]][el[1]]-barrier
+        pathArray[el[0]].splice(el[1],1,pathValue)
+        gameArray[el[0]].splice(el[1],1,"snake")})
     let snakeHead = snakeArr[snakeArr.length-1]
     
     gameArray[snakeHead[0]].splice([snakeHead[1]],1,"head")
@@ -283,7 +264,8 @@ function snakeMovement(snake, mode){
     }
 */
     if(!gameOver){
-        
+        let pathValue = pathArray[newSnakeHead[0]][newSnakeHead[1]]-barrier
+            pathArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,pathValue)
         if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"){
             
             oldFood.push(newSnakeHead)
@@ -304,6 +286,9 @@ function snakeMovement(snake, mode){
         
         snake.shift()
         gameArray[snakeTail[0]].splice(snakeTail[1],1,undefined)
+       
+        let returnPathValue =pathArray[snakeTail[0]][snakeTail[1]]+barrier
+        pathArray[snakeTail[0]].splice(snakeTail[1],1,returnPathValue)
     
 
         if(oldFood.length>0){
@@ -343,15 +328,36 @@ function moveUp([x,y]){
 }
 
 function foodApear() {
-
     
+   
     let randomX = random(1,totalPixels-1)
     let randomY = random(1,totalPixels-1)
-    
+ 
     if(gameArray[randomX][randomY]== undefined){
        
+        for(let x = 0;x<=botVisibility;x++){
+            for(let y = 0;y<=botVisibility;y++){
+            
+               
+                if(randomX+x<totalPixels-1&&randomX-x>1&&randomY+y<totalPixels-1&&randomY-y>1){
+                  
+                    if(pathArray[randomX+x][randomY+y]>=0){
+                       
+                        if(pathArray[randomX+x][randomY+y]<botVisibility-x-y){
+                            pathArray[randomX+x].splice([randomY+y],1,botVisibility-x-y)
+                        }
+                    }
+                    if(pathArray[randomX-x][randomY-y]>=0){
+                        if(pathArray[randomX-x][randomY-y]<botVisibility-x-y){
+                            pathArray[randomX-x].splice([randomY-y],1,botVisibility-x-y)
+                        }
+                    }
+                }
+            }
+        }
         
-        return gameArray[randomX].splice(randomY,1,"food")
+        gameArray[randomX].splice(randomY,1,"food")
+        return 
     }
 
     else{
