@@ -141,7 +141,9 @@ button:focus{
 .headCrash{
     background-color: red;
 }
-
+.border{
+    background-color: red;
+}
 .food{
     background-color: yellow;
 }
