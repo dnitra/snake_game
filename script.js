@@ -99,9 +99,10 @@ function playGame(){
         }*/
         //snakeMovement(snake,mode)
       
-        
-        botSnakeMovement(snake)
         gamerLayout(snake[snake.length-1])
+        botSnakeMovement(snake)
+     
+        
         if(gameOver){container.appendChild(restartButton)}
         
          
@@ -127,7 +128,23 @@ function totalLayout(pixels,arr){
     return arr
 }
 
+function correctPathArray(){
+    for(let x = 1; x<totalPixels-1;x++){
+    
+        for(let y = 1; y<totalPixels-1;y++){
+            
+            switch (pathArray[x][y]){
+                case "food":
+                    generatePathToFood(pathArray[x][y])
+                break;
 
+                case "snake":
+                    pathArray[x].splice(y,1,-20)
+            }
+        }
+    }
+
+}
 
 function botSnakeMovement(snakeBot){
     const botHead = snake[snake.length-1]
@@ -138,9 +155,9 @@ function botSnakeMovement(snakeBot){
     function botSearchPath(botHead){
      
         const searchArray = [[pathArray[botHead[0]+1][botHead[1]],moveDown],[pathArray[botHead[0]][botHead[1]+1],moveRight],[pathArray[botHead[0]-1][botHead[1]],moveUp],[pathArray[botHead[0]][botHead[1]-1],moveLeft]].sort((a,b)=>b[0]-a[0]) 
-        console.log(searchArray)
-        if(searchArray[0][0]==searchArray[1][0]==searchArray[2][0]) return searchArray[random(0,2)][1]
-        if(searchArray[0][0]==searchArray[1][0]) return searchArray[random(0,1)][1]
+        
+        if(searchArray[0][0]==searchArray[1][0]==searchArray[2][0]) return searchArray[random(0,3)][1]
+        if(searchArray[0][0]==searchArray[1][0]) return searchArray[random(0,2)][1]
         if(searchArray[0][0]>=0)return searchArray[0][1]
         if(searchArray[1][0]>=0)return searchArray[1][1]
         if(searchArray[2][0]>=0)return searchArray[2][1]
@@ -233,8 +250,7 @@ function random (min, max) {return Math.floor(Math.random() * (max - min)) + min
 function createSnake(snakeArr){
 
     snakeArr.forEach(el => {
-        let pathValue = pathArray[el[0]][el[1]]-barrier
-        pathArray[el[0]].splice(el[1],1,pathValue)
+        pathArray[el[0]].splice(el[1],1,-1)
         gameArray[el[0]].splice(el[1],1,"snake")})
     let snakeHead = snakeArr[snakeArr.length-1]
     
@@ -248,7 +264,8 @@ function snakeMovement(snake, mode){
     let snakeTail = snake[0]
 
     let newSnakeHead = mode(snakeHead)
-/*
+    
+    /*
     for(let key =1;key<snake.length;key++){
        
         if(newSnakeHead[0]==snake[key][0]&&newSnakeHead[1]==snake[key][1]
@@ -262,50 +279,114 @@ function snakeMovement(snake, mode){
             gameOver=true 
             return
     }
-*/
+    */  
+    snake.shift()
+    gameArray[snakeTail[0]].splice(snakeTail[1],1,undefined)
+    
     if(!gameOver){
-        let pathValue = pathArray[newSnakeHead[0]][newSnakeHead[1]]-barrier
-            pathArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,pathValue)
+        
+        
+        pathArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,-1)
+        
         if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"){
             
-            oldFood.push(newSnakeHead)
             foodApear()
-            gameArray[oldFood[oldFood.length-1][0]].splice(oldFood[oldFood.length-1][1],1,"oldFood")
+
+            snake.unshift([snakeTail[0],snakeTail[1]])
+            gameArray[snakeTail[0]].splice(snakeTail[1],1,"snake")
             
+            
+            for(let x = 0;x<=botVisibility;x++){
+                for(let y = 0;y<=botVisibility;y++){
+                   
+                    
+                    if(newSnakeHead[0]+x<totalPixels-1&&newSnakeHead[0]-x>1&&newSnakeHead[1]+y<totalPixels-1&&newSnakeHead[1]-y>1){
+                      
+                        if(pathArray[newSnakeHead[0]+x][newSnakeHead[1]+y]>0){
+                            pathArray[newSnakeHead[0]+x].splice([newSnakeHead[1]+y],1,0)
+                        }
+                        if(pathArray[newSnakeHead[0]-x][newSnakeHead[1]-y]>0){
+                            pathArray[newSnakeHead[0]-x].splice([newSnakeHead[1]-y],1,0)
+                        }
+                        if(pathArray[newSnakeHead[0]+x][newSnakeHead[1]-y]>0){
+                            pathArray[newSnakeHead[0]+x].splice([newSnakeHead[1]-y],1,0)
+                        }
+                        if(pathArray[newSnakeHead[0]-x][newSnakeHead[1]+y]>0){
+                            pathArray[newSnakeHead[0]-x].splice([newSnakeHead[1]+y],1,0)
+                        }
+                    }
+                }
+            }
+            
+            for(let x = 0;x<=botVisibility*2;x++){
+                for(let y = 0;y<=botVisibility*2;y++){
+
+                    if(newSnakeHead[0]+x<totalPixels-1&&newSnakeHead[0]-x>1&&newSnakeHead[1]+y<totalPixels-1&&newSnakeHead[1]-y>1){
+                        if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]+y]=="food"){
+                            
+
+                            generatePathToFood([newSnakeHead[0]+x],[newSnakeHead[1]+y])
+                        }
+                        if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]-y]=="food"){
+                            
+                            generatePathToFood([newSnakeHead[0]-x,newSnakeHead[1]-y])
+                        }
+                        if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]-y]=="food"){
+                            
+                            generatePathToFood([newSnakeHead[0]+x,newSnakeHead[1]-y])
+                        }
+                        if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]+y]=="food"){
+                            
+                            generatePathToFood([newSnakeHead[0]-x,newSnakeHead[1]+y])
+                        }
+                    }
+                }
+            }
+            
+           
             score++
             scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
-            if(score%10 == 0 &&speedMode < gameSpeedArray.length-1) {
-                speedMode++
-                gameSpeed = gameSpeedArray[speedMode]
-            }
+            
             if(score >= highestScore){
                 highestScore = score
                 document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
             }
         }
-        
-        snake.shift()
-        gameArray[snakeTail[0]].splice(snakeTail[1],1,undefined)
        
-        let returnPathValue =pathArray[snakeTail[0]][snakeTail[1]]+barrier
-        pathArray[snakeTail[0]].splice(snakeTail[1],1,returnPathValue)
-    
-
-        if(oldFood.length>0){
-            if( snakeTail[0] == oldFood[0][0] && snakeTail[1] == oldFood[0][1]){
-                oldFood.shift()
-                snake.unshift([snakeTail[0],snakeTail[1]])
-                gameArray[snakeTail[0]].splice(snakeTail[1],1,"snake")
-                
-            }
-        
-        }
-       
-      
-        
-        snake.push(newSnakeHead)
         gameArray[snakeHead[0]].splice([snakeHead[1]],1,"snake")
         gameArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,"head")
+      
+        pathArray[snakeTail[0]].splice(snakeTail[1],1,0)
+        for(let x = 0;x<=botVisibility;x++){
+            for(let y = 0;y<=botVisibility;y++){
+
+                if(snakeTail[0]+x<totalPixels-1&&snakeTail[0]-x>1&&snakeTail[1]+y<totalPixels-1&&snakeTail[1]-y>1){
+                    if(gameArray[snakeTail[0]+x][snakeTail[1]+y]=="food"){
+                        
+
+                        generatePathToFood([snakeTail[0]+x],[snakeTail[1]+y])
+                    }
+                    if(gameArray[snakeTail[0]-x][snakeTail[1]-y]=="food"){
+                        
+                        generatePathToFood([snakeTail[0]-x,snakeTail[1]-y])
+                    }
+                    if(gameArray[snakeTail[0]+x][snakeTail[1]-y]=="food"){
+                        
+                        generatePathToFood([snakeTail[0]+x,snakeTail[1]-y])
+                    }
+                    if(gameArray[snakeTail[0]-x][snakeTail[1]+y]=="food"){
+                        
+                        generatePathToFood([snakeTail[0]-x,snakeTail[1]+y])
+                    }
+                }
+            }
+        }
+        if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"){
+            pathArray[snakeTail[0]].splice(snakeTail[1],1,-1)
+        }
+        
+        snake.push(newSnakeHead)
+        
         
     }
     
@@ -334,28 +415,8 @@ function foodApear() {
     let randomY = random(1,totalPixels-1)
  
     if(gameArray[randomX][randomY]== undefined){
-       
-        for(let x = 0;x<=botVisibility;x++){
-            for(let y = 0;y<=botVisibility;y++){
-            
-               
-                if(randomX+x<totalPixels-1&&randomX-x>1&&randomY+y<totalPixels-1&&randomY-y>1){
-                  
-                    if(pathArray[randomX+x][randomY+y]>=0){
-                       
-                        if(pathArray[randomX+x][randomY+y]<botVisibility-x-y){
-                            pathArray[randomX+x].splice([randomY+y],1,botVisibility-x-y)
-                        }
-                    }
-                    if(pathArray[randomX-x][randomY-y]>=0){
-                        if(pathArray[randomX-x][randomY-y]<botVisibility-x-y){
-                            pathArray[randomX-x].splice([randomY-y],1,botVisibility-x-y)
-                        }
-                    }
-                }
-            }
-        }
         
+        generatePathToFood([randomX,randomY])
         gameArray[randomX].splice(randomY,1,"food")
         return 
     }
@@ -407,3 +468,40 @@ function keyPressed (key){
     }
 }
 
+function generatePathToFood ([foodX,foodY]){
+    
+    for(let x = 0;x<=botVisibility;x++){
+        for(let y = 0;y<=botVisibility;y++){
+        
+        
+            if(foodX+x<totalPixels-1&&foodX-x>1&&foodY+y<totalPixels-1&&foodY-y>1){
+            
+                if(pathArray[foodX+x][foodY+y]>=0 && gameArray[foodX+x][foodY+y]!="snake"){
+                
+                    if(pathArray[foodX+x][foodY+y]<botVisibility-x-y){
+                        pathArray[foodX+x].splice([foodY+y],1,botVisibility-x-y)
+                    }
+                }
+                if(pathArray[foodX-x][foodY-y]>=0 && gameArray[foodX-x][foodY-y]!="snake"){
+                    if(pathArray[foodX-x][foodY-y]<botVisibility-x-y){
+                        pathArray[foodX-x].splice([foodY-y],1,botVisibility-x-y)
+                    }
+                }
+                if(pathArray[foodX+x][foodY-y]>=0 && gameArray[foodX+x][foodY-y]!="snake"){
+                
+                    if(pathArray[foodX+x][foodY-y]<botVisibility-x-y){
+                        pathArray[foodX+x].splice([foodY-y],1,botVisibility-x-y)
+                    }
+                }
+                if(pathArray[foodX-x][foodY+y]>=0 && gameArray[foodX-x][foodY+y]!="snake"){
+                
+                    if(pathArray[foodX-x][foodY+y]<botVisibility-x-y){
+                        pathArray[foodX-x].splice([foodY+y],1,botVisibility-x-y)
+                    }
+                }
+            }
+        }
+    }
+
+
+}
