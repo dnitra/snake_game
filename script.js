@@ -43,7 +43,7 @@ let foodArray = []
 let oldFood = []
 let botVisibility =5
 let barrier = 20
-const gameSpeedArray = [200,150,120,80,60]
+const gameSpeedArray = [600,150,120,80,60]
 let gameSpeed = gameSpeedArray[0]
 const pixelsArray = [150,400,1000]
 let gamerPixels = pixelsArray[1] 
@@ -154,7 +154,7 @@ function botSnakeMovement(snakeBot){
     
     function botSearchPath(botHead){
      
-        const searchArray = [[pathArray[botHead[0]+1][botHead[1]],moveDown],[pathArray[botHead[0]][botHead[1]+1],moveRight],[pathArray[botHead[0]-1][botHead[1]],moveUp],[pathArray[botHead[0]][botHead[1]-1],moveLeft]].sort((a,b)=>b[0]-a[0]) 
+        const searchArray = shuffleArray([[pathArray[botHead[0]+1][botHead[1]],moveDown],[pathArray[botHead[0]][botHead[1]+1],moveRight],[pathArray[botHead[0]-1][botHead[1]],moveUp],[pathArray[botHead[0]][botHead[1]-1],moveLeft]]).sort((a,b)=>b[0]-a[0]) 
         
         if(searchArray[0][0]==searchArray[1][0]==searchArray[2][0]) return searchArray[random(0,3)][1]
         if(searchArray[0][0]==searchArray[1][0]) return searchArray[random(0,2)][1]
@@ -287,14 +287,17 @@ function snakeMovement(snake, mode){
         
         
         pathArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,-1)
-        
+        pathArray[snakeTail[0]].splice(snakeTail[1],1,0)
         if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"){
             
             foodApear()
 
             snake.unshift([snakeTail[0],snakeTail[1]])
             gameArray[snakeTail[0]].splice(snakeTail[1],1,"snake")
+            pathArray[snakeTail[0]].splice(snakeTail[1],1,-1)
             
+            gameArray[snakeHead[0]].splice([snakeHead[1]],1,"snake")
+            gameArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,"head")
             
             for(let x = 0;x<=botVisibility;x++){
                 for(let y = 0;y<=botVisibility;y++){
@@ -322,21 +325,21 @@ function snakeMovement(snake, mode){
                 for(let y = 0;y<=botVisibility*2;y++){
 
                     if(newSnakeHead[0]+x<totalPixels-1&&newSnakeHead[0]-x>1&&newSnakeHead[1]+y<totalPixels-1&&newSnakeHead[1]-y>1){
+                       
                         if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]+y]=="food"){
-                            
-
-                            generatePathToFood([newSnakeHead[0]+x],[newSnakeHead[1]+y])
+                            console.log(gameArray[newSnakeHead[0]+x][newSnakeHead[1]+y]+[newSnakeHead[0]+x,newSnakeHead[1]+y])
+                            generatePathToFood([newSnakeHead[0]+x,newSnakeHead[1]+y])
                         }
                         if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]-y]=="food"){
-                            
+                            console.log(gameArray[newSnakeHead[0]-x][newSnakeHead[1]-y]+[newSnakeHead[0]-x,newSnakeHead[1]-y])
                             generatePathToFood([newSnakeHead[0]-x,newSnakeHead[1]-y])
                         }
                         if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]-y]=="food"){
-                            
+                            console.log(gameArray[newSnakeHead[0]+x][newSnakeHead[1]-y]+[newSnakeHead[0]+x,newSnakeHead[1]-y])
                             generatePathToFood([newSnakeHead[0]+x,newSnakeHead[1]-y])
                         }
                         if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]+y]=="food"){
-                            
+                            console.log(gameArray[newSnakeHead[0]-x][newSnakeHead[1]+y]+[newSnakeHead[0]-x,newSnakeHead[1]+y])
                             generatePathToFood([newSnakeHead[0]-x,newSnakeHead[1]+y])
                         }
                     }
@@ -356,13 +359,12 @@ function snakeMovement(snake, mode){
         gameArray[snakeHead[0]].splice([snakeHead[1]],1,"snake")
         gameArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,"head")
       
-        pathArray[snakeTail[0]].splice(snakeTail[1],1,0)
+        
         for(let x = 0;x<=botVisibility;x++){
             for(let y = 0;y<=botVisibility;y++){
 
                 if(snakeTail[0]+x<totalPixels-1&&snakeTail[0]-x>1&&snakeTail[1]+y<totalPixels-1&&snakeTail[1]-y>1){
                     if(gameArray[snakeTail[0]+x][snakeTail[1]+y]=="food"){
-                        
 
                         generatePathToFood([snakeTail[0]+x],[snakeTail[1]+y])
                     }
@@ -381,13 +383,9 @@ function snakeMovement(snake, mode){
                 }
             }
         }
-        if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"){
-            pathArray[snakeTail[0]].splice(snakeTail[1],1,-1)
-        }
         
         snake.push(newSnakeHead)
-        
-        
+    
     }
     
     return snake
@@ -502,6 +500,12 @@ function generatePathToFood ([foodX,foodY]){
             }
         }
     }
+}
 
-
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array
 }
