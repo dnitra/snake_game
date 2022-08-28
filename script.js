@@ -31,9 +31,9 @@ let highScoreDiv = document.querySelector(".highestScore")
 
 let speedMode, pixelsX, pixelsY, snake, game
 
-const totalPixels = 300
-const initialFood =totalPixels*10
-let initialSnakes = totalPixels*2
+const totalPixels = 100
+const initialFood =totalPixels*2
+let initialSnakes = Math.round(totalPixels/2)
 let score = 0
 scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
 let gameOver = false
@@ -50,7 +50,7 @@ const gameSpeedArray = [300,150,120,80,60]
 let gameSpeed = gameSpeedArray[0]
 const pixelsArray = [150,400,1000]
 let gamerPixels = 800
-let mode = moveRight
+let gamerMode = moveRight
 let highestScore = 0
 let gameStart = true
 let count=0
@@ -116,7 +116,7 @@ function playGame(){
     
     count++
     
-    for(let i =0;i<20;i++){
+    for(let i =0;i<1;i++){
         foodApear()
     }
     
@@ -124,14 +124,12 @@ function playGame(){
     scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
     botFocus=0
     if(score-1 == highestScore){
-
-        
         highestScore = score
         document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
     }
-        
-    snakeMovement(allSnakes[0],mode)
-            
+    
+    snakeMovement(allSnakes[0],gamerMode)
+
         
         
         
@@ -219,7 +217,7 @@ function gamerLayout(snakeHead){
                 max-height: ${100/pixelsX}`
             container_game.appendChild(square)
             
-            if(mode == moveLeft||mode == moveRight){
+            if(gamerMode == moveLeft||gamerMode == moveRight){
                 if(x<=pixelsY/2){
                     square.classList.add("ArrowUp")
                 }
@@ -227,7 +225,7 @@ function gamerLayout(snakeHead){
                     square.classList.add("ArrowDown")
                 }
             }
-            if(mode == moveUp||mode == moveDown){
+            if(gamerMode == moveUp||gamerMode == moveDown){
                 if(y<pixelsX/2){
                     square.classList.add("ArrowLeft")
                 }
@@ -260,10 +258,10 @@ function gamerLayout(snakeHead){
         }
     } 
     
-    document.querySelectorAll(".ArrowDown").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(mode!=moveUp){mode= moveDown}}));
-    document.querySelectorAll(".ArrowLeft").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(mode!=moveRight){mode= moveLeft}}));
-    document.querySelectorAll(".ArrowRight").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(mode!=moveLeft){mode= moveRight}}));
-    document.querySelectorAll(".ArrowUp").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(mode!=moveDown){mode= moveUp}}));
+    document.querySelectorAll(".ArrowDown").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(gamerMode!=moveUp){gamerMode= moveDown}}));
+    document.querySelectorAll(".ArrowLeft").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(gamerMode!=moveRight){gamerMode= moveLeft}}));
+    document.querySelectorAll(".ArrowRight").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(gamerMode!=moveLeft){gamerMode= moveRight}}));
+    document.querySelectorAll(".ArrowUp").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(gamerMode!=moveDown){gamerMode= moveUp}}));
     document.querySelectorAll(".square").forEach(arrow => arrow.addEventListener("mousedown",()=>{
         if(!gameStart){
             gameStart = true
@@ -313,10 +311,14 @@ function snakeMovement(snake, mode){
             gameArray[key[0]].splice(key[1],1,"food")
             pathArray[key[0]].splice(key[1],1,botVisibility)
             generatePathToFood([key[0],key[1]])
-            deleteSnake(snakeHead)
+            
             
         }
-        allSnakes.push(createSnake())
+        
+        if(checkSnake(snakeHead)==0){gamerMode=moveRight}
+        deleteSnake(snakeHead)
+
+        allSnakes.splice(1,0,createSnake())
         isSnakeDead = true
             
     }
@@ -474,23 +476,23 @@ function keyPressed (key){
     }
     switch(key.key){
         case "ArrowDown":
-            if(mode!=moveUp){
-                mode= moveDown
+            if(gamerMode!=moveUp){
+                gamerMode= moveDown
             }
             break;
         case "ArrowUp":
-            if(mode!=moveDown){
-                mode= moveUp
+            if(gamerMode!=moveDown){
+                gamerMode= moveUp
             }
             break;
         case "ArrowLeft":
-            if(mode!=moveRight){
-                mode= moveLeft
+            if(gamerMode!=moveRight){
+                gamerMode= moveLeft
              }
             break;
         case "ArrowRight":
-            if(mode!=moveLeft){
-                mode= moveRight
+            if(gamerMode!=moveLeft){
+                gamerMode= moveRight
             }
             break;
         case "Escape":
@@ -550,7 +552,19 @@ function deleteSnake(snakeHead) {
     for (let i = 0; i < allSnakes.length; i++) {
         
         if (allSnakes[i][allSnakes[i].length-1][0] == snakeHead[0] && allSnakes[i][allSnakes[i].length-1][1] == snakeHead[1]) {
+           
             return allSnakes.splice(i,1)
+             
+        }
+    }
+    return  
+}
+function checkSnake(snakeHead) {
+    for (let i = 0; i < allSnakes.length; i++) {
+        
+        if (allSnakes[i][allSnakes[i].length-1][0] == snakeHead[0] && allSnakes[i][allSnakes[i].length-1][1] == snakeHead[1]) {
+            
+            return i
              
         }
     }
