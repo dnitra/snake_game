@@ -31,8 +31,8 @@ let highScoreDiv = document.querySelector(".highestScore")
 
 let speedMode, pixelsX, pixelsY, snake, game
 
-const totalPixels = 400
-const initialFood =totalPixels*20
+const totalPixels = 300
+const initialFood =totalPixels*2
 let score = 0
 scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
 let gameOver = false
@@ -41,17 +41,21 @@ let pathArray =[]
 let filledArray = []
 let foodArray = []
 let oldFood = []
-let botVisibility =5
+let botVisibility =10
 let barrier = 20
-const gameSpeedArray = [600,150,120,80,60]
+let allSnakes = []
+let initialSnakes = Math.round(totalPixels/3)
+const gameSpeedArray = [300,150,120,80,60]
 let gameSpeed = gameSpeedArray[0]
 const pixelsArray = [150,400,1000]
-let gamerPixels = pixelsArray[1] 
+let gamerPixels = 800
 let mode = moveRight
 let highestScore = 0
 let gameStart = true
 let count=0
 let count2=0
+let gamerFocus = 0
+let botFocus =1
 
 
 restartButton.addEventListener("mousedown",restart)
@@ -77,14 +81,26 @@ sizeButton.addEventListener("click",(e)=>{
 
 //restart////////////////////
 
-snake = [[totalPixels/2,totalPixels/2-2],[totalPixels/2,totalPixels/2-1],[totalPixels/2,totalPixels/2]]
+
 totalLayout(totalPixels, gameArray)
 
+gamerSnake = [[totalPixels/2,totalPixels/2-2],[totalPixels/2,totalPixels/2-1],[totalPixels/2,totalPixels/2]]
+allSnakes.push(gamerSnake)
+gamerSnake.forEach(el => {
+    pathArray[el[0]].splice(el[1],1,-1)
+    gameArray[el[0]].splice(el[1],1,"snake")})
+let gamerSnakeHead = gamerSnake[gamerSnake.length-1]
+
+gameArray[gamerSnakeHead[0]].splice([gamerSnakeHead[1]],1,"head")
+
 for(let i=0;i<initialFood;i++){
-    foodArray.push(foodApear())
+    foodApear()
+}
+for(let i=0;i<initialSnakes;i++){
+    allSnakes.push(createSnake([]))
 }
 
-createSnake(snake)
+
 playGame()
 
 ///////////////////////////
@@ -97,11 +113,30 @@ function playGame(){
             gameArray[snake[snake.length-1][0]].splice(snake[snake.length-1][1],1,"headCrash")
             clearInterval(game)
         }*/
-        //snakeMovement(snake,mode)
+        
+            
+        
       
-        gamerLayout(snake[snake.length-1])
-        botSnakeMovement(snake)
-     
+        score = allSnakes[0].length-3
+        scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
+        botFocus=0
+        if(score-1 == highestScore){
+
+            
+            highestScore = score
+            document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
+        }
+        if(score-1 == highestScore||score == highestScore){
+            snakeMovement(allSnakes[0],mode)
+            botFocus=1
+        }
+        
+        
+        
+        for(let i=botFocus;i<allSnakes.length;i++){
+            botSnakeMovement(allSnakes[i])
+        }
+        gamerLayout(allSnakes[0][allSnakes[0].length-1])
         
         if(gameOver){container.appendChild(restartButton)}
         
@@ -119,7 +154,7 @@ function totalLayout(pixels,arr){
             
             arr[x].length++
             pathArray[x].push(0)
-            if(x==0||x==totalPixels==-1||y==0||y==totalPixels-1){
+            if(x==0||x==totalPixels-1||y==0||y==totalPixels-1){
                 arr[x].splice(y,1,"border")
                 pathArray[x].splice(y,1,-barrier)
             }   
@@ -128,44 +163,25 @@ function totalLayout(pixels,arr){
     return arr
 }
 
-function correctPathArray(){
-    for(let x = 1; x<totalPixels-1;x++){
-    
-        for(let y = 1; y<totalPixels-1;y++){
-            
-            switch (pathArray[x][y]){
-                case "food":
-                    generatePathToFood(pathArray[x][y])
-                break;
 
-                case "snake":
-                    pathArray[x].splice(y,1,-20)
-            }
-        }
-    }
-
-}
 
 function botSnakeMovement(snakeBot){
-    const botHead = snake[snake.length-1]
+    const botHead = snakeBot[snakeBot.length-1]
     const mode = botSearchPath(botHead)
-    
-    
     
     function botSearchPath(botHead){
      
         const searchArray = shuffleArray([[pathArray[botHead[0]+1][botHead[1]],moveDown],[pathArray[botHead[0]][botHead[1]+1],moveRight],[pathArray[botHead[0]-1][botHead[1]],moveUp],[pathArray[botHead[0]][botHead[1]-1],moveLeft]]).sort((a,b)=>b[0]-a[0]) 
         
-        if(searchArray[0][0]==searchArray[1][0]==searchArray[2][0]) return searchArray[random(0,3)][1]
-        if(searchArray[0][0]==searchArray[1][0]) return searchArray[random(0,2)][1]
+        
         if(searchArray[0][0]>=0)return searchArray[0][1]
         if(searchArray[1][0]>=0)return searchArray[1][1]
-        if(searchArray[2][0]>=0)return searchArray[2][1]
+        if(searchArray[2][0]>=-1)return searchArray[2][1]
         return searchArray[3][1]
         
     }
         
-    return snakeMovement(snake, mode)
+    return snakeMovement(snakeBot, mode)
 }
 
 
@@ -194,7 +210,7 @@ function gamerLayout(snakeHead){
             let square = document.createElement("div")
             square.classList.add("square")
             square.id = "x"+(x+startIndex_X)+"y"+(y+startIndex_Y)
-            square.textContent = pathArray[x+startIndex_X][y+startIndex_Y]
+            
             square.style.cssText += 
                 `min-width: ${100/pixelsX}%;
                 max-height: ${100/pixelsX}`
@@ -211,25 +227,26 @@ function gamerLayout(snakeHead){
             else {
                 square.classList.add("ArrowDown")
             }
-            
-            switch(gameArray[x+startIndex_X][y+startIndex_Y]){
+            if(x+startIndex_X<totalPixels && y+startIndex_Y<totalPixels &&x+startIndex_X>=0&& y+startIndex_Y>=0){
+              //  square.textContent = pathArray[x+startIndex_X][y+startIndex_Y]
 
-                case "snake":
-                    square.classList.add("snake")
+                switch(gameArray[x+startIndex_X][y+startIndex_Y]){
+
+                    case "snake":
+                        square.classList.add("snake")
+                        break;
+                    
+                    case "head":
+                        square.classList.add("head")
+                        break;
+                    case "food":
+                            square.classList.add("food")
                     break;
-                
-                case "head":
-                    square.classList.add("head")
+                   
+                    case "border":
+                            square.classList.add("border")
                     break;
-                case "food":
-                        square.classList.add("food")
-                break;
-                case "headCrash":
-                        square.classList.add("headCrash")
-                break;
-                case "border":
-                        square.classList.add("border")
-                break;
+                }
             }
         }
     } 
@@ -247,43 +264,56 @@ function gamerLayout(snakeHead){
 }
 function random (min, max) {return Math.floor(Math.random() * (max - min)) + min}
 
-function createSnake(snakeArr){
-
-    snakeArr.forEach(el => {
-        pathArray[el[0]].splice(el[1],1,-1)
-        gameArray[el[0]].splice(el[1],1,"snake")})
-    let snakeHead = snakeArr[snakeArr.length-1]
+function createSnake(){
     
-    gameArray[snakeHead[0]].splice([snakeHead[1]],1,"head")
+    let randomX = random(2,totalPixels-2)
+    let randomY = random(4,totalPixels-2)
+
+   
+    if(gameArray[randomX][randomY]== undefined&&gameArray[randomX][randomY-1]== undefined&&gameArray[randomX][randomY-2]== undefined){
+        let snakeArr = [[randomX,randomY-2],[randomX,randomY-1],[randomX,randomY]]
+        snakeArr.forEach(el => {
+            pathArray[el[0]].splice(el[1],1,-1)
+            gameArray[el[0]].splice(el[1],1,"snake")})
+        let snakeHead = snakeArr[snakeArr.length-1]
+        
+        gameArray[snakeHead[0]].splice([snakeHead[1]],1,"head")
+        return snakeArr
+    }
+
+    else{
+        
+        return createSnake([])
+    }
+    
     
 }
 function snakeMovement(snake, mode){
-    
-
+ 
+    let isSnakeDead = false
     let snakeHead = snake[snake.length-1]
     let snakeTail = snake[0]
 
     let newSnakeHead = mode(snakeHead)
     
-    /*
-    for(let key =1;key<snake.length;key++){
-       
-        if(newSnakeHead[0]==snake[key][0]&&newSnakeHead[1]==snake[key][1]
-            ){
-            gameOver=true
-            return
-        }
-    }
     
-    if (newSnakeHead[0]>totalPixels-2 || newSnakeHead[0]<1 || newSnakeHead[1]>totalPixels-2 || newSnakeHead[1]<1){
-            gameOver=true 
-            return
+
+    if(newSnakeHead[0]>totalPixels-2 || newSnakeHead[0]<1 || newSnakeHead[1]>totalPixels-2 || newSnakeHead[1]<1||gameArray[newSnakeHead[0]][newSnakeHead[1]]=="snake"||gameArray[newSnakeHead[0]][newSnakeHead[1]]=="head"){
+        
+        for(let key of snake){
+            gameArray[key[0]].splice(key[1],1,"food")
+            pathArray[key[0]].splice(key[1],1,botVisibility)
+            generatePathToFood([key[0],key[1]])
+            deleteSnake(snakeHead)
+        }
+        
+        isSnakeDead = true
+            
     }
-    */  
     snake.shift()
     gameArray[snakeTail[0]].splice(snakeTail[1],1,undefined)
     
-    if(!gameOver){
+    if(!isSnakeDead){
         
         
         pathArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,-1)
@@ -327,32 +357,19 @@ function snakeMovement(snake, mode){
                     if(newSnakeHead[0]+x<totalPixels-1&&newSnakeHead[0]-x>1&&newSnakeHead[1]+y<totalPixels-1&&newSnakeHead[1]-y>1){
                        
                         if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]+y]=="food"){
-                            console.log(gameArray[newSnakeHead[0]+x][newSnakeHead[1]+y]+[newSnakeHead[0]+x,newSnakeHead[1]+y])
                             generatePathToFood([newSnakeHead[0]+x,newSnakeHead[1]+y])
                         }
                         if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]-y]=="food"){
-                            console.log(gameArray[newSnakeHead[0]-x][newSnakeHead[1]-y]+[newSnakeHead[0]-x,newSnakeHead[1]-y])
                             generatePathToFood([newSnakeHead[0]-x,newSnakeHead[1]-y])
                         }
                         if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]-y]=="food"){
-                            console.log(gameArray[newSnakeHead[0]+x][newSnakeHead[1]-y]+[newSnakeHead[0]+x,newSnakeHead[1]-y])
                             generatePathToFood([newSnakeHead[0]+x,newSnakeHead[1]-y])
                         }
                         if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]+y]=="food"){
-                            console.log(gameArray[newSnakeHead[0]-x][newSnakeHead[1]+y]+[newSnakeHead[0]-x,newSnakeHead[1]+y])
                             generatePathToFood([newSnakeHead[0]-x,newSnakeHead[1]+y])
                         }
                     }
                 }
-            }
-            
-           
-            score++
-            scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
-            
-            if(score >= highestScore){
-                highestScore = score
-                document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
             }
         }
        
@@ -387,7 +404,8 @@ function snakeMovement(snake, mode){
         snake.push(newSnakeHead)
     
     }
-    
+
+   
     return snake
 }
 
@@ -508,4 +526,15 @@ function shuffleArray(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array
+}
+
+function deleteSnake(snakeHead) {
+    for (let i = 0; i < allSnakes.length; i++) {
+        
+        if (allSnakes[i][allSnakes[i].length-1][0] == snakeHead[0] && allSnakes[i][allSnakes[i].length-1][1] == snakeHead[1]) {
+            return allSnakes.splice(i,1)
+             
+        }
+    }
+    return  
 }
