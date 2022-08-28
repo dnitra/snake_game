@@ -32,7 +32,8 @@ let highScoreDiv = document.querySelector(".highestScore")
 let speedMode, pixelsX, pixelsY, snake, game
 
 const totalPixels = 300
-const initialFood =totalPixels*2
+const initialFood =totalPixels*10
+let initialSnakes = totalPixels*2
 let score = 0
 scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
 let gameOver = false
@@ -44,7 +45,7 @@ let oldFood = []
 let botVisibility =10
 let barrier = 20
 let allSnakes = []
-let initialSnakes = Math.round(totalPixels/3)
+
 const gameSpeedArray = [300,150,120,80,60]
 let gameSpeed = gameSpeedArray[0]
 const pixelsArray = [150,400,1000]
@@ -53,7 +54,6 @@ let mode = moveRight
 let highestScore = 0
 let gameStart = true
 let count=0
-let count2=0
 let gamerFocus = 0
 let botFocus =1
 
@@ -113,27 +113,30 @@ function playGame(){
             gameArray[snake[snake.length-1][0]].splice(snake[snake.length-1][1],1,"headCrash")
             clearInterval(game)
         }*/
-        
-            
-        
-      
-        score = allSnakes[0].length-3
-        scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
-        botFocus=0
-        if(score-1 == highestScore){
+    
+    count++
+    
+    for(let i =0;i<20;i++){
+        foodApear()
+    }
+    
+    score = allSnakes[0].length-3
+    scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
+    botFocus=0
+    if(score-1 == highestScore){
 
+        
+        highestScore = score
+        document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
+    }
+        
+    snakeMovement(allSnakes[0],mode)
             
-            highestScore = score
-            document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
-        }
-        if(score-1 == highestScore||score == highestScore){
-            snakeMovement(allSnakes[0],mode)
-            botFocus=1
-        }
         
         
         
-        for(let i=botFocus;i<allSnakes.length;i++){
+        
+        for(let i=1;i<allSnakes.length;i++){
             botSnakeMovement(allSnakes[i])
         }
         gamerLayout(allSnakes[0][allSnakes[0].length-1])
@@ -215,18 +218,24 @@ function gamerLayout(snakeHead){
                 `min-width: ${100/pixelsX}%;
                 max-height: ${100/pixelsX}`
             container_game.appendChild(square)
-            if(x>pixelsY/4&&y>=pixelsX/2&&x<pixelsY*(3/4)){
-                square.classList.add("ArrowRight")
-            }  
-            else if(x<=pixelsY/4){
-                square.classList.add("ArrowUp")
+            
+            if(mode == moveLeft||mode == moveRight){
+                if(x<=pixelsY/2){
+                    square.classList.add("ArrowUp")
+                }
+                else {
+                    square.classList.add("ArrowDown")
+                }
             }
-            else if(x>pixelsY/4&&y<pixelsX/2&&x<pixelsY*(3/4)){
-                square.classList.add("ArrowLeft")
+            if(mode == moveUp||mode == moveDown){
+                if(y<pixelsX/2){
+                    square.classList.add("ArrowLeft")
+                }
+                else{
+                    square.classList.add("ArrowRight")
+                } 
             }
-            else {
-                square.classList.add("ArrowDown")
-            }
+            
             if(x+startIndex_X<totalPixels && y+startIndex_Y<totalPixels &&x+startIndex_X>=0&& y+startIndex_Y>=0){
               //  square.textContent = pathArray[x+startIndex_X][y+startIndex_Y]
 
@@ -251,10 +260,10 @@ function gamerLayout(snakeHead){
         }
     } 
     
-    document.querySelectorAll(".ArrowDown").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveDown));
-    document.querySelectorAll(".ArrowLeft").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveLeft));
-    document.querySelectorAll(".ArrowRight").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveRight));
-    document.querySelectorAll(".ArrowUp").forEach(arrow => arrow.addEventListener("mousedown",()=>mode= moveUp));
+    document.querySelectorAll(".ArrowDown").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(mode!=moveUp){mode= moveDown}}));
+    document.querySelectorAll(".ArrowLeft").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(mode!=moveRight){mode= moveLeft}}));
+    document.querySelectorAll(".ArrowRight").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(mode!=moveLeft){mode= moveRight}}));
+    document.querySelectorAll(".ArrowUp").forEach(arrow => arrow.addEventListener("mousedown",()=>{if(mode!=moveDown){mode= moveUp}}));
     document.querySelectorAll(".square").forEach(arrow => arrow.addEventListener("mousedown",()=>{
         if(!gameStart){
             gameStart = true
@@ -305,8 +314,9 @@ function snakeMovement(snake, mode){
             pathArray[key[0]].splice(key[1],1,botVisibility)
             generatePathToFood([key[0],key[1]])
             deleteSnake(snakeHead)
+            
         }
-        
+        allSnakes.push(createSnake())
         isSnakeDead = true
             
     }
@@ -320,7 +330,7 @@ function snakeMovement(snake, mode){
         pathArray[snakeTail[0]].splice(snakeTail[1],1,0)
         if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"){
             
-            foodApear()
+            //foodApear()
 
             snake.unshift([snakeTail[0],snakeTail[1]])
             gameArray[snakeTail[0]].splice(snakeTail[1],1,"snake")
@@ -464,16 +474,24 @@ function keyPressed (key){
     }
     switch(key.key){
         case "ArrowDown":
-            mode= moveDown
+            if(mode!=moveUp){
+                mode= moveDown
+            }
             break;
         case "ArrowUp":
-            mode= moveUp
+            if(mode!=moveDown){
+                mode= moveUp
+            }
             break;
         case "ArrowLeft":
-            mode= moveLeft
+            if(mode!=moveRight){
+                mode= moveLeft
+             }
             break;
         case "ArrowRight":
-            mode= moveRight
+            if(mode!=moveLeft){
+                mode= moveRight
+            }
             break;
         case "Escape":
             clearInterval(game)
