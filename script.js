@@ -32,8 +32,8 @@ let highScoreDiv = document.querySelector(".highestScore")
 let speedMode, pixelsX, pixelsY, snake, game
 
 const totalPixels = 100
-const initialFood =totalPixels*2
-let initialSnakes = Math.round(totalPixels/2)
+const initialFood =totalPixels
+let initialSnakes = Math.round(totalPixels/5)
 let score = 0
 scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
 let gameOver = false
@@ -116,10 +116,6 @@ function playGame(){
     
     count++
     
-    for(let i =0;i<1;i++){
-        foodApear()
-    }
-    
     score = allSnakes[0].length-3
     scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
     botFocus=0
@@ -127,16 +123,16 @@ function playGame(){
         highestScore = score
         document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
     }
-    
+   
     snakeMovement(allSnakes[0],gamerMode)
+    
+    for(let i=1;i<allSnakes.length;i++){
+        botSnakeMovement(allSnakes[i])
+    }
+
+   
 
         
-        
-        
-        
-        for(let i=1;i<allSnakes.length;i++){
-            botSnakeMovement(allSnakes[i])
-        }
         gamerLayout(allSnakes[0][allSnakes[0].length-1])
         
         if(gameOver){container.appendChild(restartButton)}
@@ -237,22 +233,8 @@ function gamerLayout(snakeHead){
             if(x+startIndex_X<totalPixels && y+startIndex_Y<totalPixels &&x+startIndex_X>=0&& y+startIndex_Y>=0){
               //  square.textContent = pathArray[x+startIndex_X][y+startIndex_Y]
 
-                switch(gameArray[x+startIndex_X][y+startIndex_Y]){
-
-                    case "snake":
-                        square.classList.add("snake")
-                        break;
-                    
-                    case "head":
-                        square.classList.add("head")
-                        break;
-                    case "food":
-                            square.classList.add("food")
-                    break;
-                   
-                    case "border":
-                            square.classList.add("border")
-                    break;
+                if(gameArray[x+startIndex_X][y+startIndex_Y] !=undefined){
+                        square.classList.add(`${gameArray[x+startIndex_X][y+startIndex_Y]}`)
                 }
             }
         }
@@ -308,17 +290,18 @@ function snakeMovement(snake, mode){
     if(newSnakeHead[0]>totalPixels-2 || newSnakeHead[0]<1 || newSnakeHead[1]>totalPixels-2 || newSnakeHead[1]<1||gameArray[newSnakeHead[0]][newSnakeHead[1]]=="snake"||gameArray[newSnakeHead[0]][newSnakeHead[1]]=="head"){
         
         for(let key of snake){
-            gameArray[key[0]].splice(key[1],1,"food")
+            gameArray[key[0]].splice(key[1],1,"snakeFood")
             pathArray[key[0]].splice(key[1],1,botVisibility)
             generatePathToFood([key[0],key[1]])
-            
-            
         }
         
-        if(checkSnake(snakeHead)==0){gamerMode=moveRight}
+        if(checkSnake(snakeHead)==0){
+            gamerMode=moveRight
+            allSnakes.splice(1,0,createSnake())
+        }
         deleteSnake(snakeHead)
 
-        allSnakes.splice(1,0,createSnake())
+        
         isSnakeDead = true
             
     }
@@ -330,10 +313,11 @@ function snakeMovement(snake, mode){
         
         pathArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,-1)
         pathArray[snakeTail[0]].splice(snakeTail[1],1,0)
-        if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"){
+        if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"||gameArray[newSnakeHead[0]][newSnakeHead[1]]== "snakeFood"){
             
-            //foodApear()
-
+            if(gameArray[newSnakeHead[0]][newSnakeHead[1]]== "food"){
+                foodApear()
+            }
             snake.unshift([snakeTail[0],snakeTail[1]])
             gameArray[snakeTail[0]].splice(snakeTail[1],1,"snake")
             pathArray[snakeTail[0]].splice(snakeTail[1],1,-1)
@@ -388,7 +372,6 @@ function snakeMovement(snake, mode){
         gameArray[snakeHead[0]].splice([snakeHead[1]],1,"snake")
         gameArray[newSnakeHead[0]].splice([newSnakeHead[1]],1,"head")
       
-        
         for(let x = 0;x<=botVisibility;x++){
             for(let y = 0;y<=botVisibility;y++){
 
@@ -453,11 +436,6 @@ function foodApear() {
         
         return foodApear()
     }
-    
-    
-    
-
-    
 }
   
 function restart(){

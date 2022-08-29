@@ -81,7 +81,11 @@ body{
     width: 100%;
     top: 70px;
     bottom: 0;
-    background-color: black;
+   
+    background-color: #000000;
+    opacity: 0.8;
+    background-image:  repeating-radial-gradient( circle at 0 0, transparent 0, #00001e 10px ), repeating-linear-gradient( #32323255, #818181 );
+
 
 }
 img{
@@ -132,11 +136,14 @@ button:focus{
 }
 
 .snake{
-    background-color: green;
+    background-color: #010161;
+    opacity: 0.7;
 }
 
 .head{
-    background-color: grey;
+    background-color: rgb(134, 0, 0);
+    border-radius: 20%;
+    opacity: 0.9;
 }
 .headCrash{
     background-color: red;
@@ -145,7 +152,14 @@ button:focus{
     background-color: red;
 }
 .food{
-    background-color: yellow;
+    border-radius: 50%;
+    background-color: #ffff00;
+    opacity: 0.6;
+}
+.snakeFood{
+    border-radius: 50%;
+    background-color: #ff5500;
+    opacity: 0.6;   
 }
 .square{
     -webkit-touch-callout: none;
