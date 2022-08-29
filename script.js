@@ -1,5 +1,9 @@
 const container_game = document.querySelector(".container_game")
 const container = document.querySelector(".container")
+const startGame = document.querySelector("#startGame")
+const menu =  document.querySelector("#menu")
+
+
 
 const helpButton =document.querySelector("#help-content") 
 const user = window.mobileAndTabletCheck = function() {
@@ -11,13 +15,13 @@ const user = window.mobileAndTabletCheck = function() {
 if(user()){ 
     helpButton.innerHTML = 
     `<p>Click on size button to change the layout!</p> 
-    <p>Use display to start and navigate the snake!</p> 
+    <p>Use display to navigate the snake!</p> 
     <img src='display_touch_area.png'>`
 }
 else{
     helpButton.innerHTML = 
     `<p>Click on size button to change the layout!</p>
-    <p>Use keyboard arrows to start and navigate the snake!</p>`
+    <p>Use keyboard arrows to navigate the snake!</p>`
 }
 
 const restartButton = document.createElement("button") 
@@ -36,7 +40,7 @@ const initialFood =totalPixels
 let initialSnakes = Math.round(totalPixels/5)
 let score = 0
 scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
-let gameOver = false
+
 let gameArray =[]
 let pathArray =[]
 let filledArray = []
@@ -48,16 +52,24 @@ let allSnakes = []
 
 const gameSpeedArray = [300,150,120,80,60]
 let gameSpeed = gameSpeedArray[0]
-const pixelsArray = [150,400,1000]
+const pixelsArray = [totalPixels*totalPixels/50,totalPixels*totalPixels/10,totalPixels*totalPixels*1.5]
 let gamerPixels = 800
 let gamerMode = moveRight
 let highestScore = 0
-let gameStart = true
 let count=0
 let gamerFocus = 0
-let botFocus =1
+let botFocus =0
+let gameOver = true
+let gameStart = false
 
-
+startGame.addEventListener("click",()=>{
+    allSnakes.unshift(createSnake())  
+    gameOver=false
+    gameStart=true
+    botFocus=1
+    gamerFocus = 0
+    menu.style.display = "none"
+})
 restartButton.addEventListener("mousedown",restart)
 window.addEventListener("keydown",keyPressed)
 sizeButton.addEventListener("click",(e)=>{
@@ -81,7 +93,7 @@ sizeButton.addEventListener("click",(e)=>{
 
 //restart////////////////////
 
-
+playGame()
 totalLayout(totalPixels, gameArray)
 
 gamerSnake = [[totalPixels/2,totalPixels/2-2],[totalPixels/2,totalPixels/2-1],[totalPixels/2,totalPixels/2]]
@@ -100,42 +112,34 @@ for(let i=0;i<initialSnakes;i++){
     allSnakes.push(createSnake([]))
 }
 
-
-playGame()
-
 ///////////////////////////
 
 function playGame(){
-     
+   
     game = setInterval(()=>{
  
-       /* if(gameOver){
-            gameArray[snake[snake.length-1][0]].splice(snake[snake.length-1][1],1,"headCrash")
-            clearInterval(game)
-        }*/
+       
     
     count++
     
     score = allSnakes[0].length-3
     scoreDiv = document.querySelector(".score").textContent = "Score: "+ score
-    botFocus=0
+   
     if(score-1 == highestScore){
         highestScore = score
         document.querySelector(".highestScore").textContent = "Highest score: "+ highestScore
     }
-   
+    if(!gameOver){
     snakeMovement(allSnakes[0],gamerMode)
-    
-    for(let i=1;i<allSnakes.length;i++){
+    }
+    for(let i=botFocus;i<allSnakes.length;i++){
         botSnakeMovement(allSnakes[i])
     }
-
-   
-
+    
+    
+    gamerLayout(allSnakes[gamerFocus][allSnakes[gamerFocus].length-1])
         
-        gamerLayout(allSnakes[0][allSnakes[0].length-1])
         
-        if(gameOver){container.appendChild(restartButton)}
         
          
       }, gameSpeed)
@@ -298,6 +302,9 @@ function snakeMovement(snake, mode){
         if(checkSnake(snakeHead)==0){
             gamerMode=moveRight
             allSnakes.splice(1,0,createSnake())
+            gameOver= true
+            menu.style.display = "flex"
+            gamerFocus=2
         }
         deleteSnake(snakeHead)
 
@@ -352,16 +359,16 @@ function snakeMovement(snake, mode){
 
                     if(newSnakeHead[0]+x<totalPixels-1&&newSnakeHead[0]-x>1&&newSnakeHead[1]+y<totalPixels-1&&newSnakeHead[1]-y>1){
                        
-                        if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]+y]=="food"){
+                        if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]+y]=="food"||gameArray[newSnakeHead[0]+x][newSnakeHead[1]+y]=="snakeFood"){
                             generatePathToFood([newSnakeHead[0]+x,newSnakeHead[1]+y])
                         }
-                        if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]-y]=="food"){
+                        if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]-y]=="food"||gameArray[newSnakeHead[0]-x][newSnakeHead[1]-y]=="snakeFood"){
                             generatePathToFood([newSnakeHead[0]-x,newSnakeHead[1]-y])
                         }
-                        if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]-y]=="food"){
+                        if(gameArray[newSnakeHead[0]+x][newSnakeHead[1]-y]=="food"||gameArray[newSnakeHead[0]+x][newSnakeHead[1]-y]=="snakeFood"){
                             generatePathToFood([newSnakeHead[0]+x,newSnakeHead[1]-y])
                         }
-                        if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]+y]=="food"){
+                        if(gameArray[newSnakeHead[0]-x][newSnakeHead[1]+y]=="food"||gameArray[newSnakeHead[0]-x][newSnakeHead[1]+y]=="snakeFood"){
                             generatePathToFood([newSnakeHead[0]-x,newSnakeHead[1]+y])
                         }
                     }
@@ -376,19 +383,19 @@ function snakeMovement(snake, mode){
             for(let y = 0;y<=botVisibility;y++){
 
                 if(snakeTail[0]+x<totalPixels-1&&snakeTail[0]-x>1&&snakeTail[1]+y<totalPixels-1&&snakeTail[1]-y>1){
-                    if(gameArray[snakeTail[0]+x][snakeTail[1]+y]=="food"){
+                    if(gameArray[snakeTail[0]+x][snakeTail[1]+y]=="food"||gameArray[snakeTail[0]+x][snakeTail[1]+y]=="snakeFood"){
 
                         generatePathToFood([snakeTail[0]+x],[snakeTail[1]+y])
                     }
-                    if(gameArray[snakeTail[0]-x][snakeTail[1]-y]=="food"){
+                    if(gameArray[snakeTail[0]-x][snakeTail[1]-y]=="food"||gameArray[snakeTail[0]-x][snakeTail[1]-y]=="snakeFood"){
                         
                         generatePathToFood([snakeTail[0]-x,snakeTail[1]-y])
                     }
-                    if(gameArray[snakeTail[0]+x][snakeTail[1]-y]=="food"){
+                    if(gameArray[snakeTail[0]+x][snakeTail[1]-y]=="food"||gameArray[snakeTail[0]+x][snakeTail[1]-y]=="snakeFood"){
                         
                         generatePathToFood([snakeTail[0]+x,snakeTail[1]-y])
                     }
-                    if(gameArray[snakeTail[0]-x][snakeTail[1]+y]=="food"){
+                    if(gameArray[snakeTail[0]-x][snakeTail[1]+y]=="food"||gameArray[snakeTail[0]-x][snakeTail[1]+y]=="snakeFood"){
                         
                         generatePathToFood([snakeTail[0]-x,snakeTail[1]+y])
                     }
@@ -448,10 +455,7 @@ function restart(){
 }
 
 function keyPressed (key){
-    if(!gameStart){
-        gameStart = true
-        playGame()
-    }
+    
     switch(key.key){
         case "ArrowDown":
             if(gamerMode!=moveUp){
