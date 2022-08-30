@@ -11,19 +11,26 @@
 
 </head>
 <body>
+    <div id="score"></div>
     <div class="container">
-        <div class="score"></div>
-        <div class="highestScore"></div>
+        <button class="menuB" id="startGame">Start play</button>
+        <button class="menuB" id="watchBot">Watch a bot</button>
+        <div class="menuB sliderDiv">
+            <label for="gameSpeed">Game speed</label>
+            <input type="range" min="5" max="1000" value="250" class="slider" id="gameSpeed">
+        </div>
+
+        <div class="menuB sliderDiv">
+            <label for="mapSize">Layout size</label>
+            <input type="range" min="10" max="500000" value="300" class="slider" id="mapSize">
+        </div>
+        <div class="menuB sliderDiv" >
+            <label for="totalPixels">Game size</label>
+            <input type="range" min="10" max="400" value="100" class="slider" id="totalPixels">
+        </div>
         
     </div>
-    <div id="menu">
-        <button id="startGame">Start the game</button>
-        <button id="size">Medium size</button>
-        <button id="help">Help
-            <div id="help-content"></div>
-        </button>
-        
-    </div>
+ 
 
     <div class="container_game"> 
         
