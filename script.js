@@ -45,7 +45,7 @@ let filledArray = []
 let foodArray = []
 let oldFood = []
 let allSnakes = []
-let botVisibility =10
+let botVisibility =20
 let barrier = 20
 
 
@@ -60,6 +60,7 @@ let gameOver = true
 let gameStart = false
 let mouseDown = true
 let watchBot=true
+let twoPlayers= false
 
 startGame.addEventListener("click",()=>{
     watchBot=false
@@ -74,7 +75,11 @@ startGame.addEventListener("click",()=>{
 })
 
 window.addEventListener("keydown",keyPressed)
-mapSize.addEventListener("input",(e)=>gamerPixels = e.target.min*e.target.max/ e.target.value)
+mapSize.addEventListener("input",(e)=>{
+    gamerPixels = e.target.min*e.target.max/ e.target.value
+    
+}
+)
 watchBotSlider.addEventListener("click",(e)=>{
     watchBot=true
     gameOver=false
@@ -90,7 +95,9 @@ gameSpeedSlider.addEventListener("input",(e)=>{
     clearInterval(game)
     playGame()
 })
-totalLayoutSlider.addEventListener("input",(e)=>newPixels=e.target.value)
+totalLayoutSlider.addEventListener("input",(e)=>{
+    newPixels=e.target.value
+})
 totalLayoutSlider.addEventListener("mouseup",()=>{
     clearInterval(game)
     
