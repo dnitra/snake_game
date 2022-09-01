@@ -1,13 +1,16 @@
 const container_game = document.querySelector(".container_game")
 const container = document.querySelector(".container")
-const startGame = document.querySelector("#startGame")
+const startGameDiv = document.querySelector("#startGame")
 const menu =  document.querySelector("#menu")
 const mapSize = document.querySelector("#mapSize")
 const totalLayoutSlider = document.querySelector("#totalPixels")
 const gameSpeedSlider = document.querySelector("#gameSpeed")
 const watchBotSlider = document.querySelector("#watchBot")
 const twoPlayersButton = document.querySelector("#twoPlayers")
+let c = document.querySelector(".container_game");
 
+c.width=window.innerWidth
+c.height=window.innerHeight
 
 const user = window.mobileAndTabletCheck = function() {
     let check = false;
@@ -17,7 +20,7 @@ const user = window.mobileAndTabletCheck = function() {
 
 if(user()){
    
-    startGame.style.display="none"
+    startGameDiv.style.display="none"
     twoPlayersButton.style.display="none"
 }
  
@@ -32,7 +35,7 @@ let scoreDiv = document.querySelector(".score")
 
 let speedMode, pixelsX, pixelsY, snake, game
 
-let totalPixels = 100
+let totalPixels = totalLayoutSlider.value
 let newPixels
 let initialFood =totalPixels
 let initialSnakes = Math.round(totalPixels/5)
@@ -62,7 +65,7 @@ let mouseDown = true
 let watchBot=true
 let twoPlayers= false
 
-startGame.addEventListener("click",()=>{
+startGameDiv.addEventListener("click",()=>{
     watchBot=false
     gameOver=false
     gameStart=true
@@ -109,20 +112,13 @@ totalLayoutSlider.addEventListener("mouseup",()=>{
     allSnakes = []
     initialFood =totalPixels
     initialSnakes = Math.round(totalPixels/5)
-    totalLayout(totalPixels, gameArray)
-    for(let i=0;i<initialFood;i++){
-       
-        foodApear()
-    }
-    for(let i=0;i<initialSnakes;i++){
-        allSnakes.push(createSnake([]))
-    }
-    playGame()
+    startGame()
 })
 
 //restart////////////////////
+startGame()
 
-//playGame()
+function startGame(){
 totalLayout(totalPixels, gameArray)
 
 
@@ -131,6 +127,8 @@ for(let i=0;i<initialFood;i++){
 }
 for(let i=0;i<initialSnakes;i++){
     allSnakes.push(createSnake([]))
+}
+playGame()
 }
 
 ///////////////////////////
@@ -204,16 +202,24 @@ function botSnakeMovement(snakeBot){
 
 
 function gamerLayout(snakeHead){
-    let element = document.querySelector(".container_game")
+    //let element = document.querySelector(".container_game")
+   /*
     while (element.firstChild) {
     element.removeChild(element.firstChild);
     }
+*/  
 
     
-    let width = container_game.clientWidth
-    let widthGame =container_game.offsetWidth
-    let heightGame = container_game.offsetHeight
+    let widthGame =window.innerWidth
+    let heightGame = window.innerHeight
     let ratio = widthGame/heightGame
+
+    c = document.querySelector(".container_game");
+    let ctx = c.getContext("2d");
+    c.width=widthGame
+    c.height=heightGame
+    ctx.clearRect(0, 0, c.width, c.height);
+    
     
     pixelsX =Math.round(Math.sqrt(ratio *gamerPixels*gamerPixels))
     pixelsY = Math.round((gamerPixels*gamerPixels/pixelsX))
@@ -225,8 +231,12 @@ function gamerLayout(snakeHead){
     for(let x =0;x<pixelsY;x++){
         for(let y =0; y<pixelsX;y++){
             
-            let square = document.createElement("div")
-        
+            //let square = document.createElement("div")
+            
+            
+            ctx.beginPath();
+            
+            /*
             square.id = "x"+(x+startIndex_X)+"y"+(y+startIndex_Y)
             
             square.style.cssText += 
@@ -238,7 +248,7 @@ function gamerLayout(snakeHead){
                 min-height:${heightGame/pixelsY}px;
                 `
             
-            
+            */
            /* 
             if(playerOneMode == moveLeft||playerOneMode == moveRight){
                 if(x<=pixelsY/2){
@@ -261,8 +271,42 @@ function gamerLayout(snakeHead){
                 //square.textContent = pathArray[x+startIndex_X][y+startIndex_Y]
 
                 if(gameArray[x+startIndex_X][y+startIndex_Y] !=undefined){
-                    square.classList.add(`${gameArray[x+startIndex_X][y+startIndex_Y]}`)
+                    /*square.classList.add(`${gameArray[x+startIndex_X][y+startIndex_Y]}`)
                     container_game.appendChild(square)
+                    */
+
+                    switch(gameArray[x+startIndex_X][y+startIndex_Y]){
+            
+                        case "snake":
+                            ctx.rect(y*(widthGame/pixelsX), x*(heightGame/pixelsY), widthGame/pixelsX, heightGame/pixelsY)
+                            ctx.fillStyle = "blue";
+                        break;
+                            
+                        case "head":
+                            ctx.rect(y*(widthGame/pixelsX), x*(heightGame/pixelsY), widthGame/pixelsX, heightGame/pixelsY)
+                            ctx.fillStyle = "grey";
+                        break;
+                        
+                        case "food":
+                            ctx.arc(y*(widthGame/pixelsX)+0.5*(widthGame/pixelsX), x*(heightGame/pixelsY)+0.5*(heightGame/pixelsY), (heightGame/pixelsY)*0.5, 0, 2 * Math.PI)
+                            ctx.fillStyle = "yellow";
+                        break;
+
+                        case "snakeFood":
+                            ctx.arc(y*(widthGame/pixelsX)+0.5*(widthGame/pixelsX), x*(heightGame/pixelsY)+0.5*(heightGame/pixelsY), (heightGame/pixelsY)*0.5, 0, 2 * Math.PI)
+                            ctx.fillStyle = "orange";
+                        break;
+        
+                        case "border":
+                            ctx.rect(y*(widthGame/pixelsX), x*(heightGame/pixelsY), widthGame/pixelsX, heightGame/pixelsY)
+                            ctx.fillStyle = "red";
+                        break;
+                        
+                            
+                    }
+
+                    ctx.fill()
+
                 }
             }
         }
