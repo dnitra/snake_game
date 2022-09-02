@@ -1,6 +1,7 @@
 const container_game = document.querySelector(".container_game")
 const container = document.querySelector(".container")
 const startGameDiv = document.querySelector("#startGame")
+const restartButton = document.querySelector("#restart")
 const menu =  document.querySelector("#menu")
 const mapSize = document.querySelector("#mapSize")
 const totalLayoutSlider = document.querySelector("#totalPixels")
@@ -24,9 +25,7 @@ if(user()){
     twoPlayersButton.style.display="none"
 }
  
-const restartButton = document.createElement("button") 
-restartButton.id = "restartButton"
-restartButton.textContent = "Restart"
+
 
 const startButton = document.querySelector("#start")
 const sizeButton = document.querySelector("#size")
@@ -36,7 +35,7 @@ let scoreDiv = document.querySelector(".score")
 let speedMode, pixelsX, pixelsY, snake, game
 
 let totalPixels = totalLayoutSlider.value
-let newPixels
+let newPixels = totalPixels
 let initialFood =totalPixels
 let initialSnakes = Math.round(totalPixels/5)
 let score = 0
@@ -83,6 +82,7 @@ mapSize.addEventListener("input",(e)=>{
     
 }
 )
+restartButton.addEventListener("click",restart)
 watchBotSlider.addEventListener("click",(e)=>{
     watchBot=true
     gameOver=false
@@ -101,21 +101,11 @@ gameSpeedSlider.addEventListener("input",(e)=>{
 totalLayoutSlider.addEventListener("input",(e)=>{
     newPixels=e.target.value
 })
-totalLayoutSlider.addEventListener("mouseup",()=>{
-    clearInterval(game)
-    
-    totalPixels=newPixels
-    gameArray=[]
-    pathArray =[]
-    foodArray = []
-    oldFood = []
-    allSnakes = []
-    initialFood =totalPixels
-    initialSnakes = Math.round(totalPixels/5)
-    startGame()
-})
 
-//restart////////////////////
+
+totalLayoutSlider.addEventListener("mouseup",restart)
+
+/////////////////////////////////////
 startGame()
 
 function startGame(){
@@ -130,8 +120,22 @@ for(let i=0;i<initialSnakes;i++){
 }
 playGame()
 }
+function restart(){
+    clearInterval(game)
+    totalPixels=newPixels
+    gameArray=[]
+    pathArray =[]
+    foodArray = []
+    oldFood = []
+    allSnakes = []
+    initialFood =totalPixels
+    initialSnakes = Math.round(totalPixels/5)
+    startGame()
+    console.log("it workded")
+}
 
-///////////////////////////
+
+//////////////////////////////////////
 
 function playGame(){
    
@@ -144,12 +148,14 @@ function playGame(){
 
             score = allSnakes[gamerFocus].length-3
             document.querySelector("#score").textContent = "Score: "+ score
+            
             if(!gameOver){
                 if(!watchBot){
                     
                     snakeMovement(allSnakes[0],playerOneMode)
                 }
             }
+            
             for(let i=botFocus;i<allSnakes.length;i++){
                 botSnakeMovement(allSnakes[i])
             }
@@ -202,13 +208,7 @@ function botSnakeMovement(snakeBot){
 
 
 function gamerLayout(snakeHead){
-    //let element = document.querySelector(".container_game")
-   /*
-    while (element.firstChild) {
-    element.removeChild(element.firstChild);
-    }
-*/  
-
+ 
     
     let widthGame =window.innerWidth
     let heightGame = window.innerHeight
@@ -231,49 +231,15 @@ function gamerLayout(snakeHead){
     for(let x =0;x<pixelsY;x++){
         for(let y =0; y<pixelsX;y++){
             
-            //let square = document.createElement("div")
-            
             
             ctx.beginPath();
             
-            /*
-            square.id = "x"+(x+startIndex_X)+"y"+(y+startIndex_Y)
-            
-            square.style.cssText += 
-                `
-                position: absolute;
-                top: ${x*(100/pixelsY)}%;
-                left: ${y*(100/pixelsX)}%;
-                min-width: ${widthGame/pixelsX}px;
-                min-height:${heightGame/pixelsY}px;
-                `
-            
-            */
-           /* 
-            if(playerOneMode == moveLeft||playerOneMode == moveRight){
-                if(x<=pixelsY/2){
-                    square.classList.add("ArrowUp")
-                }
-                else {
-                    square.classList.add("ArrowDown")
-                }
-            }
-            if(playerOneMode == moveUp||playerOneMode == moveDown){
-                if(y<pixelsX/2){
-                    square.classList.add("ArrowLeft")
-                }
-                else{
-                    square.classList.add("ArrowRight")
-                } 
-            }
-            */
+           
             if(x+startIndex_X<totalPixels && y+startIndex_Y<totalPixels &&x+startIndex_X>=0&& y+startIndex_Y>=0){
                 //square.textContent = pathArray[x+startIndex_X][y+startIndex_Y]
 
                 if(gameArray[x+startIndex_X][y+startIndex_Y] !=undefined){
-                    /*square.classList.add(`${gameArray[x+startIndex_X][y+startIndex_Y]}`)
-                    container_game.appendChild(square)
-                    */
+                    
 
                     switch(gameArray[x+startIndex_X][y+startIndex_Y]){
             
@@ -516,9 +482,7 @@ function foodApear() {
     }
 }
   
-function restart(){
-    
-}
+
 
 function keyPressed (key){
     
