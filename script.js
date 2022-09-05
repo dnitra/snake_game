@@ -47,7 +47,7 @@ let filledArray = []
 let foodArray = []
 let oldFood = []
 let allSnakes = []
-let botVisibility =20
+let botVisibility =25
 let barrier = 20
 
 
@@ -131,7 +131,7 @@ function restart(){
     initialFood =totalPixels
     initialSnakes = Math.round(totalPixels/5)
     startGame()
-    console.log("it workded")
+   
 }
 
 
@@ -192,15 +192,26 @@ function botSnakeMovement(snakeBot){
     const mode = botSearchPath(botHead)
     
     function botSearchPath(botHead){
-     
-        const searchArray = shuffleArray([[pathArray[botHead[0]+1][botHead[1]],moveDown],[pathArray[botHead[0]][botHead[1]+1],moveRight],[pathArray[botHead[0]-1][botHead[1]],moveUp],[pathArray[botHead[0]][botHead[1]-1],moveLeft]]).sort((a,b)=>b[0]-a[0]) 
         
+        let searchArray = shuffleArray([[pathArray[botHead[0]+1][botHead[1]],moveDown],[pathArray[botHead[0]][botHead[1]+1],moveRight],[pathArray[botHead[0]-1][botHead[1]],moveUp],[pathArray[botHead[0]][botHead[1]-1],moveLeft]]).sort((a,b)=>b[0]-a[0]) 
+        
+
+       // .map(e=>e[0]>=0?[e.splice(0,1,(willBotDieThere(e[1](botHead)))?e[0]:-5),e[1]]:[e[0],e[1]])
+        
+       
         
         if(searchArray[0][0]>=0)return searchArray[0][1]
         if(searchArray[1][0]>=0)return searchArray[1][1]
         if(searchArray[2][0]>=-1)return searchArray[2][1]
         return searchArray[3][1]
         
+    }
+    function willBotDieThere (testBotHead){
+        
+        let look = [pathArray[testBotHead[0]+1][testBotHead[1]],pathArray[testBotHead[0]][testBotHead[1]+1],pathArray[testBotHead[0]-1][testBotHead[1]],pathArray[testBotHead[0]][testBotHead[1]-1]]
+        
+        
+        return look.some(el=>el>=0)
     }
         
     return snakeMovement(snakeBot, mode)
@@ -216,6 +227,7 @@ function gamerLayout(snakeHead){
 
     c = document.querySelector(".container_game");
     let ctx = c.getContext("2d");
+    
     c.width=widthGame
     c.height=heightGame
     ctx.clearRect(0, 0, c.width, c.height);
@@ -236,7 +248,10 @@ function gamerLayout(snakeHead){
             
            
             if(x+startIndex_X<totalPixels && y+startIndex_Y<totalPixels &&x+startIndex_X>=0&& y+startIndex_Y>=0){
-                //square.textContent = pathArray[x+startIndex_X][y+startIndex_Y]
+               
+
+              //  ctx.font = "20px Arial";
+               // ctx.fillText(pathArray[x+startIndex_X][y+startIndex_Y], y*(widthGame/pixelsX), x*(heightGame/pixelsY)+20);
 
                 if(gameArray[x+startIndex_X][y+startIndex_Y] !=undefined){
                     
